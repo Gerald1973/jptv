@@ -1,4 +1,4 @@
-package com.smilesmile1973;
+package com.smilesmile1973.jptv;
 
 public class Main {
 
