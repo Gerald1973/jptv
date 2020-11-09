@@ -3,6 +3,10 @@
  */
 package com.smilesmile1973.jptv.view;
 
+import java.io.IOException;
+
+import com.smilesmile1973.jptv.controller.PreferencesCtrl;
+
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -33,6 +37,22 @@ public class Preferences extends Stage {
 		buttonOk = new Button("Ok");
 		lblUrl = new Label("URL M3U");
 		txtUrl = new TextField();
+		buttonCancel.setOnAction(actionEvent -> this.close());
+		try {
+			txtUrl.setText(PreferencesCtrl.getInstance().readProperty(PreferencesCtrl.KEY_IPTV_M3U));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		buttonOk.setOnAction(actionEvent -> {
+			String key = PreferencesCtrl.KEY_IPTV_M3U;
+			String value = txtUrl.getText();
+			try {
+				PreferencesCtrl.getInstance().writeProperty(key, value);
+				this.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
 	}
 
 	private Parent buildRoot() {

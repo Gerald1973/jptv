@@ -129,6 +129,7 @@ public class PreferencesCtrl {
 	 */
 	public void writeProperty(String key, String value) throws IOException {
 		File file = new File(CONFIG_FILE);
+		LOG.debug(file.getAbsolutePath());
 		PREFERENCES.put(key.trim(), value);
 		if (file.exists()) {
 			try (FileChannel fileChannel = FileChannel.open(Paths.get(file.getAbsolutePath()),
