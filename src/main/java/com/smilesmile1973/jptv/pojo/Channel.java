@@ -1,6 +1,6 @@
 package com.smilesmile1973.jptv.pojo;
 
-public class ExtInf {
+public class Channel {
 
 	private String groupTitle;
 	private long length;
@@ -8,6 +8,15 @@ public class ExtInf {
 	private String tvgName;
 	private String tvLogo;
 	private String groupTitle2;
+	private String channelURL;
+
+	public String getChannelURL() {
+		return channelURL;
+	}
+
+	public void setChannelURL(String channelURL) {
+		this.channelURL = channelURL;
+	}
 
 	public String getTvLogo() {
 		return tvLogo;
@@ -45,6 +54,7 @@ public class ExtInf {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((channelURL == null) ? 0 : channelURL.hashCode());
 		result = prime * result + ((groupTitle == null) ? 0 : groupTitle.hashCode());
 		result = prime * result + ((groupTitle2 == null) ? 0 : groupTitle2.hashCode());
 		result = prime * result + (int) (length ^ (length >>> 32));
@@ -62,7 +72,12 @@ public class ExtInf {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ExtInf other = (ExtInf) obj;
+		Channel other = (Channel) obj;
+		if (channelURL == null) {
+			if (other.channelURL != null)
+				return false;
+		} else if (!channelURL.equals(other.channelURL))
+			return false;
 		if (groupTitle == null) {
 			if (other.groupTitle != null)
 				return false;
