@@ -6,18 +6,19 @@ package com.smilesmile1973.jptv.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.smilesmile1973.jptv.service.M3UService;
+
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
@@ -63,10 +64,15 @@ public class Main extends Application {
 
 	@Override
 	public void init() {
-		videoImageView = new ImageView();
-		this.videoImageView.setPreserveRatio(true);
-		embeddedMediaPlayer.videoSurface()
-				.set(ImageViewVideoSurfaceFactory.videoSurfaceForImageView(this.videoImageView));
+		try {
+			M3UService.getInstance().buildChannels("ttt");
+			videoImageView = new ImageView();
+			this.videoImageView.setPreserveRatio(true);
+			embeddedMediaPlayer.videoSurface()
+					.set(ImageViewVideoSurfaceFactory.videoSurfaceForImageView(this.videoImageView));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void main(String[] args) {
@@ -84,7 +90,7 @@ public class Main extends Application {
 		stage.setScene(scene);
 		stage.show();
 		embeddedMediaPlayer.media().play(getParameters().getRaw().get(0));
-        embeddedMediaPlayer.controls().setPosition(0.4f);
+		embeddedMediaPlayer.controls().setPosition(0.4f);
 	}
 
 	private Parent buildRoot(Window owner) {
@@ -94,13 +100,13 @@ public class Main extends Application {
 		videoImageView.fitWidthProperty().bind(root.widthProperty());
 		videoImageView.fitHeightProperty().bind(root.heightProperty());
 		root.widthProperty().addListener((observableValue, oldValue, newValue) -> {
-            // If you need to know about resizes
-        });
+			// If you need to know about resizes
+		});
 
-        root.heightProperty().addListener((observableValue, oldValue, newValue) -> {
-            // If you need to know about resizes
-        });
-        root.setCenter(videoImageView);
+		root.heightProperty().addListener((observableValue, oldValue, newValue) -> {
+			// If you need to know about resizes
+		});
+		root.setCenter(videoImageView);
 		return root;
 	}
 
@@ -115,9 +121,8 @@ public class Main extends Application {
 	}
 
 	private Node buildLeftPane() {
-		VBox vBox = new VBox();
-		vBox.getChildren().add(new Label("Label"));
-		return vBox;
+		ScrollPane scrollPane = new ScrollPane(new ChannelAccordion());
+		return scrollPane;
 	}
 
 	private Node buildTopPane(Window owner) {

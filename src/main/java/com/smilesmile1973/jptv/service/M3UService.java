@@ -26,7 +26,10 @@ public class M3UService {
 
 	private static M3UService instance;
 
+	private Map<String, List<Channel>> channels;
+
 	private M3UService() {
+		channels = new TreeMap<>();
 	}
 
 	public static final M3UService getInstance() {
@@ -60,7 +63,6 @@ public class M3UService {
 	}
 
 	public Map<String, List<Channel>> buildChannels(String url) throws Exception {
-		Map<String, List<Channel>> results = new TreeMap<>();
 		List<String> strings = fetchWebSite(url);
 		String[] sources = new String[2];
 		if (strings != null && !strings.isEmpty() && strings.get(0).equals("#EXTM3U")) {
@@ -68,18 +70,22 @@ public class M3UService {
 				sources[0] = strings.get(i);
 				sources[1] = strings.get(i + 1);
 				Channel channel = ChannelConverter.getInstance().toTarget(sources);
-				if (results.get(channel.getGroupTitle()) == null) {
-					results.put(channel.getGroupTitle(), new LinkedList<Channel>());
+				if (channels.get(channel.getGroupTitle()) == null) {
+					channels.put(channel.getGroupTitle(), new LinkedList<Channel>());
 				} else {
-					results.get(channel.getGroupTitle()).add(channel);
+					channels.get(channel.getGroupTitle()).add(channel);
 				}
 			}
-			Set<Entry<String, List<Channel>>> entries = results.entrySet();
+			Set<Entry<String, List<Channel>>> entries = channels.entrySet();
 			for (Entry<String, List<Channel>> entry : entries) {
 				entry.getValue().sort(Comparator.comparing(Channel::getTvgName));
 			}
 		}
-		return results;
+		return channels;
+	}
+
+	public Map<String, List<Channel>> getChannels() {
+		return channels;
 	}
 
 }

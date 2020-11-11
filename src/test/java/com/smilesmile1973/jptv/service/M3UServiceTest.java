@@ -23,7 +23,6 @@ public class M3UServiceTest {
 
 	@Test
 	public void testbuildChannels() throws Exception {
-
 		Map<String, List<Channel>> results = M3UService.getInstance().buildChannels("TTTTT");
 		assertTrue(!results.isEmpty());
 	}
