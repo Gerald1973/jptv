@@ -40,7 +40,8 @@ public class GroupTitlePane extends TitledPane {
 	public Node getVbox(String group) {
 		ScrollPane scrollPane = new ScrollPane();
 		VBox vbox = new VBox();
-		List<Channel> channels = M3UService.getInstance().getChannels().get(group);
+		List<Channel> channels = M3UService.getInstance().sortGroup(group);
+
 		for (Channel channel : channels) {
 			vbox.getChildren().add(new ChannelView(channel));
 		}

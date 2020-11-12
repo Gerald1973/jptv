@@ -6,12 +6,10 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
@@ -40,7 +38,7 @@ public class M3UService {
 	}
 
 	public List<String> fetchWebSite(String url) throws Exception {
-		List<String> results = new LinkedList<String>();
+		List<String> results = new ArrayList<String>();
 		URL resource = new URL(url);
 		InputStream in = resource.openStream();
 		BufferedInputStream buffer = new BufferedInputStream(in);
@@ -71,16 +69,18 @@ public class M3UService {
 				sources[1] = strings.get(i + 1);
 				Channel channel = ChannelConverter.getInstance().toTarget(sources);
 				if (channels.get(channel.getGroupTitle()) == null) {
-					channels.put(channel.getGroupTitle(), new LinkedList<Channel>());
+					channels.put(channel.getGroupTitle(), new ArrayList<Channel>());
 				} else {
 					channels.get(channel.getGroupTitle()).add(channel);
 				}
 			}
-			Set<Entry<String, List<Channel>>> entries = channels.entrySet();
-			for (Entry<String, List<Channel>> entry : entries) {
-				entry.getValue().sort(Comparator.comparing(Channel::getTvgName));
-			}
 		}
+		return channels;
+	}
+
+	public List<Channel> sortGroup(String group) {
+		List<Channel> channels = this.channels.get(group);
+		channels.sort(Comparator.comparing(Channel::getTvgName));
 		return channels;
 	}
 

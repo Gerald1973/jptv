@@ -14,17 +14,29 @@ public class ChannelConverter implements Converter<String[], Channel> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChannelConverter.class);
 
-	private static final String[] RE_LENGTH = { "length", "#EXTINF:(?<length>[-]?[0-9]+)" };
+	private static final String GR_LENGTH = "length";
 
-	private static final String[] RE_TVGID = { "tvgId", "tvg-id=\"(?<tvgId>[^\\\"]*)" };
+	private static final Pattern PA_LENGTH = Pattern.compile("#EXTINF:(?<length>[-]?[0-9]+)");
 
-	private static final String[] RE_TVLOGO = { "tvLogo", "tvg-logo=\"(?<tvLogo>[^\\\"]*)" };
+	private static final String GR_TVGID = "tvgId";
 
-	private static final String[] RE_TVGNAME = { "tvgName", "tvg-name=\"(?<tvgName>[^\\\"]*)" };
+	private static final Pattern PA_TVGID = Pattern.compile("tvg-id=\"(?<tvgId>[^\\\"]*)");
 
-	private static final String[] RE_GROUPTITLE = { "groupTitle", "group-title=\"(?<groupTitle>[^\\\"]*)\"" };
+	private static final String GR_TVLOGO = "tvLogo";
 
-	private static final String[] RE_GROUPTITLE2 = { "groupTitle2", "group-title=\".*\",(?<groupTitle2>.*)" };
+	private static final Pattern PA_TVLOGO = Pattern.compile("tvg-logo=\"(?<tvLogo>[^\\\"]*)");
+
+	private static final String GR_TVGNAME = "tvgName";
+
+	private static final Pattern PA_TVGNAME = Pattern.compile("tvg-name=\\\"(?<tvgName>[^\\\\\\\"]*)");
+
+	private static final String GR_GROUPTITLE = "groupTitle";
+
+	private static final Pattern PA_GROUPTITLE = Pattern.compile("group-title=\"(?<groupTitle>[^\\\"]*)\"");
+
+	private static final String GR_GROUPTITLE2 = "groupTitle2";
+
+	private static final Pattern PA_GROUPTITLE2 = Pattern.compile("group-title=\".*\",(?<groupTitle2>.*)");
 
 	public static final ChannelConverter getInstance() {
 		if (instance == null) {
@@ -33,14 +45,13 @@ public class ChannelConverter implements Converter<String[], Channel> {
 		return instance;
 	}
 
-	private String fetch(String source, String[] pattern) {
+	private String fetch(String source, Pattern pattern, String groupName) {
 		String result = "";
-		Pattern regEx = Pattern.compile(pattern[1]);
-		Matcher matcher = regEx.matcher(source);
+		Matcher matcher = pattern.matcher(source);
 		if (matcher.find()) {
-			result = matcher.group(pattern[0]);
+			result = matcher.group(groupName);
 		} else {
-			LOG.error("The pattern \"{}\" doesn't match something in the source \"{}\".", pattern[0], source);
+			LOG.error("The pattern \"{}\" doesn't match something in the source \"{}\".", pattern.pattern(), source);
 		}
 		return result;
 	}
@@ -74,12 +85,12 @@ public class ChannelConverter implements Converter<String[], Channel> {
 		Channel result = new Channel();
 		String info = source[0];
 		String url = source[1];
-		result.setLength(Long.parseLong(fetch(info, RE_LENGTH)));
-		result.setTvgId(fetch(info, RE_TVGID));
-		result.setTvgName(fetch(info, RE_TVGNAME));
-		result.setTvLogo(fetch(info, RE_TVLOGO));
-		result.setGroupTitle(fetch(info, RE_GROUPTITLE));
-		result.setGroupTitle2(fetch(info, RE_GROUPTITLE2));
+		result.setLength(Long.parseLong(fetch(info, PA_LENGTH, GR_LENGTH)));
+		result.setTvgId(fetch(info, PA_TVGID, GR_TVGID));
+		result.setTvgName(fetch(info, PA_TVGNAME, GR_TVGNAME));
+		result.setTvLogo(fetch(info, PA_TVLOGO, GR_TVLOGO));
+		result.setGroupTitle(fetch(info, PA_GROUPTITLE, GR_GROUPTITLE));
+		result.setGroupTitle2(fetch(info, PA_GROUPTITLE2, GR_GROUPTITLE2));
 		result.setChannelURL(url.trim());
 		return result;
 	}

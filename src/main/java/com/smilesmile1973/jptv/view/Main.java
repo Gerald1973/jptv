@@ -19,6 +19,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
@@ -65,7 +66,7 @@ public class Main extends Application {
 	@Override
 	public void init() {
 		try {
-			M3UService.getInstance().buildChannels("ttt");
+			M3UService.getInstance().buildChannels("tttt");
 			videoImageView = new ImageView();
 			this.videoImageView.setPreserveRatio(true);
 			embeddedMediaPlayer.videoSurface()
@@ -97,16 +98,7 @@ public class Main extends Application {
 		BorderPane root = new BorderPane();
 		root.setTop(buildTopPane(owner));
 		root.setLeft(buildLeftPane());
-		videoImageView.fitWidthProperty().bind(root.widthProperty());
-		videoImageView.fitHeightProperty().bind(root.heightProperty());
-		root.widthProperty().addListener((observableValue, oldValue, newValue) -> {
-			// If you need to know about resizes
-		});
-
-		root.heightProperty().addListener((observableValue, oldValue, newValue) -> {
-			// If you need to know about resizes
-		});
-		root.setCenter(videoImageView);
+		root.setCenter(buildCenterPane());
 		return root;
 	}
 
@@ -129,6 +121,21 @@ public class Main extends Application {
 		HBox hbox = new HBox();
 		hbox.getChildren().add(buildMenu(owner));
 		return hbox;
+	}
+
+	private Node buildCenterPane() {
+		StackPane node = new StackPane();
+		videoImageView.fitWidthProperty().bind(node.widthProperty());
+		videoImageView.fitHeightProperty().bind(node.heightProperty());
+		node.widthProperty().addListener((observableValue, oldValue, newValue) -> {
+			// If you need to know about resizes
+		});
+
+		node.heightProperty().addListener((observableValue, oldValue, newValue) -> {
+			// If you need to know about resizes
+		});
+		node.getChildren().add(videoImageView);
+		return node;
 	}
 
 }
