@@ -66,7 +66,7 @@ public class Main extends Application {
 	@Override
 	public void init() {
 		try {
-			M3UService.getInstance().buildChannels("");
+			M3UService.getInstance().buildChannels("https://iptv-org.github.io/iptv/languages/fra.m3u");
 			videoImageView = new ImageView();
 			this.videoImageView.setPreserveRatio(true);
 			embeddedMediaPlayer.videoSurface()
