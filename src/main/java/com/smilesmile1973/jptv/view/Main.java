@@ -66,7 +66,7 @@ public class Main extends Application {
 	@Override
 	public void init() {
 		try {
-			M3UService.getInstance().buildChannels("tttt");
+			M3UService.getInstance().buildChannels("");
 			videoImageView = new ImageView();
 			this.videoImageView.setPreserveRatio(true);
 			embeddedMediaPlayer.videoSurface()
@@ -87,6 +87,7 @@ public class Main extends Application {
 		videoImageView = new ImageView();
 		videoImageView.setPreserveRatio(true);
 		Scene scene = new Scene(buildRoot(stage), 960, 540);
+		scene.getStylesheets().add(getClass().getClassLoader().getResource("styles.css").toExternalForm());
 		stage.setTitle("JPTV");
 		stage.setScene(scene);
 		stage.show();

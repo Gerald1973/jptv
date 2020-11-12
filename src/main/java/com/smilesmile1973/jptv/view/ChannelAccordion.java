@@ -7,12 +7,10 @@ import java.util.Set;
 import com.smilesmile1973.jptv.service.M3UService;
 
 import javafx.scene.control.Accordion;
-import javafx.scene.control.TitledPane;
 
 public class ChannelAccordion extends Accordion {
 
 	public ChannelAccordion() {
-		TitledPane titlePane = new TitledPane();
 		getPanes().addAll(buildGroupTitlePanes());
 	}
 

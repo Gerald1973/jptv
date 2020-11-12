@@ -19,12 +19,15 @@ public class GroupTitlePane extends TitledPane {
 
 	private static final Logger LOG = LoggerFactory.getLogger(GroupTitlePane.class);
 
+	private VBox vbox = new VBox();
+
 	public GroupTitlePane(String title) {
 		this.title = title;
 		this.setText(title);
 		this.setContent(getVbox(title));
 		this.setOnMouseClicked(event -> {
 			LOG.debug("Expanded : {}", this.isExpanded());
+			this.fillVbox(title);
 			this.setContent(getVbox(title));
 			if (!this.isExpanded()) {
 				if (this.getContent() == null) {
@@ -39,14 +42,17 @@ public class GroupTitlePane extends TitledPane {
 
 	public Node getVbox(String group) {
 		ScrollPane scrollPane = new ScrollPane();
-		VBox vbox = new VBox();
-		List<Channel> channels = M3UService.getInstance().sortGroup(group);
-
-		for (Channel channel : channels) {
-			vbox.getChildren().add(new ChannelView(channel));
-		}
 		scrollPane.setContent(vbox);
 		return scrollPane;
+	}
+
+	public Node fillVbox(String group) {
+		List<Channel> channels = M3UService.getInstance().sortGroup(group);
+		for (Channel channel : channels) {
+			ChannelView channelView = new ChannelView(channel);
+			this.vbox.getChildren().add(channelView);
+		}
+		return this.vbox;
 	}
 
 }
