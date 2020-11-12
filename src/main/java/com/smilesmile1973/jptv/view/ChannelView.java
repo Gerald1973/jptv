@@ -3,6 +3,8 @@ package com.smilesmile1973.jptv.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.smilesmile1973.jptv.Utils;
+import com.smilesmile1973.jptv.event.EventChannel;
 import com.smilesmile1973.jptv.pojo.Channel;
 
 import javafx.application.Platform;
@@ -24,8 +26,11 @@ public class ChannelView extends GridPane {
 
 	private ImageView imageView = new ImageView();
 
+	private Channel channel;
+
 	public ChannelView(Channel channel) {
 		LOG.debug(channel.getTvLogo());
+		this.channel = channel;
 		// Logo
 		StackPane pane = new StackPane();
 		pane.getStyleClass().add("imageViewPane");
@@ -38,6 +43,16 @@ public class ChannelView extends GridPane {
 
 		this.add(pane, 0, 0);
 		this.add(label, 1, 0);
+
+		this.setOnMouseClicked(event -> {
+			ChannelView channelView = (ChannelView) event.getSource();
+			LOG.debug("Change to channel {}", channelView.getChannel().getChannelURL());
+			Utils.getEventBus().post(new EventChannel(channel));
+		});
+	}
+
+	private Channel getChannel() {
+		return this.channel;
 	}
 
 	public void loadImage(Channel channel) {

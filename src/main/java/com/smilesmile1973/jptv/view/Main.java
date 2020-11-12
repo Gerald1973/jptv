@@ -6,6 +6,9 @@ package com.smilesmile1973.jptv.view;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.Subscribe;
+import com.smilesmile1973.jptv.Utils;
+import com.smilesmile1973.jptv.event.EventChannel;
 import com.smilesmile1973.jptv.service.M3UService;
 
 import javafx.application.Application;
@@ -66,6 +69,7 @@ public class Main extends Application {
 	@Override
 	public void init() {
 		try {
+			Utils.getEventBus().register(this);
 			M3UService.getInstance().buildChannels("https://iptv-org.github.io/iptv/languages/fra.m3u");
 			videoImageView = new ImageView();
 			this.videoImageView.setPreserveRatio(true);
@@ -137,6 +141,12 @@ public class Main extends Application {
 		});
 		node.getChildren().add(videoImageView);
 		return node;
+	}
+
+	@Subscribe
+	public void changeChannel(EventChannel eventChannel) {
+		LOG.debug("Change channel to {}:", eventChannel.getChannel().getChannelURL());
+		embeddedMediaPlayer.media().play(eventChannel.getChannel().getChannelURL());
 	}
 
 }
