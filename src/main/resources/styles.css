@@ -1,17 +1,34 @@
 .groupTitlePane {
-	-fx-vgap: 3px;
-	-fx-border-radius: 5px 5px 5px 5px;
+	-fx-vgap: 3.0px;
+	-fx-border-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-background-radius: 5.0px 5.0px 5.0px 5.0px;
 }
+
+
 
 .channelView {
-	-fx-border-radius: 5px;
-	-fx-border-style: solid;
-	-fx-border-color: gold;
-	-fx-border-width: 2px;
+	-fx-border-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-background-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-border-style: solid ;
+	-fx-border-color: lightgray;
+	-fx-border-width: 2.0px;
 }
 
-.label {
+.tilePaneChannelView {
+	-fx-background-color: black;
+	-fx-border-radius: 5px 5px 5px 5px;
+	-fx-background-radius: 5.0px 5.0px 5.0px 5.0px;
+}
+
+.labelChannelView {
 	-fx-alignment: center-left;
 	-fx-wrap-text: true;
-	-fx-font: 16px bold ;
+	-fx-font-family: sans-serif;
+	-fx-font-size: 16.0px;
+	-fx-font-weight: bold;
+	-fx-text-fill: white;
+}
+
+.channelView, .label {
+	-fx-background-color: darkgray;
 }

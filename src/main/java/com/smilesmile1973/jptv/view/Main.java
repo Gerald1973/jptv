@@ -138,9 +138,11 @@ public class Main extends Application {
 			@Override
 			public void changed(ObservableValue<? extends TitledPane> observable, TitledPane oldValue,
 					TitledPane titledPane) {
+				
 				if (titledPane != null) {
 					titledPane.setContent(null);
 					TilePane pane = new TilePane();
+					pane.getStyleClass().add("tilePaneChannelView");
 					pane.setVgap(5);
 					List<Channel> channels = M3UService.getInstance().sortGroup(titledPane.getText());
 					for (int i = 0; i < channels.size(); i++) {

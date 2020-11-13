@@ -38,9 +38,6 @@ public class ChannelView extends GridPane {
 		this.channel = channel;
 		// Logo
 		StackPane pane = new StackPane();
-//		BackgroundFill bf = new BackgroundFill(Color.RED, null, null);
-//		Background ba = new Background(bf);
-//		pane.setBackground(ba);
 		pane.setPrefSize(LOGO_PANE_WIDTH, LOGO_PANE_HEIGHT);
 		pane.setMaxSize(LOGO_PANE_WIDTH, LOGO_PANE_HEIGHT);
 		ImageView imageView = new ImageView();
@@ -48,6 +45,7 @@ public class ChannelView extends GridPane {
 		pane.getChildren().add(imageView);
 		// Channel name
 		Label label = new Label(buildTextLabel());
+		label.getStyleClass().add("labelChannelView");
 		label.setPrefWidth(LABEL_MAX_WIDTH);
 		label.setMaxWidth(LABEL_MAX_WIDTH);
 		label.setMinWidth(LABEL_MAX_WIDTH);
