@@ -13,13 +13,14 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 
 public class ChannelView extends GridPane {
 
-	private static final double LOGO_PANE_WIDTH = 40;
-	private static final double LOGO_PANE_HEIGHT = 40;
+	private static final double LOGO_PANE_WIDTH = 50;
+	private static final double LOGO_PANE_HEIGHT = 50;
 	private static final double LOGO_IMAGE_WIDTH = 30;
 	private static final double LOGO_IMAGE_HEIGHT = 30;
 
@@ -46,6 +47,12 @@ public class ChannelView extends GridPane {
 			LOG.debug("Change to channel {}", channelView.getChannel().getChannelURL());
 			Utils.getEventBus().post(new EventChannel(channel));
 		});
+
+		ColumnConstraints col0 = new ColumnConstraints();
+		ColumnConstraints col1 = new ColumnConstraints();
+		col0.setPrefWidth(LOGO_IMAGE_WIDTH + 2);
+		col1.setPrefWidth(REMAINING);
+		this.getColumnConstraints().addAll(col0, col1);
 
 		this.add(pane, 0, 0);
 		this.add(label, 1, 0);

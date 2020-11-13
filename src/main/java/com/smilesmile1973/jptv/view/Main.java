@@ -117,49 +117,18 @@ public class Main extends Application {
 		return menuBar;
 	}
 
-//	public ChannelAccordion() {
-//		Set<String> keys = M3UService.getInstance().getChannels().keySet();
-//		for (String string : keys) {
-//			GroupTitlePane groupTitlePane = new GroupTitlePane(string, this);
-//			getPanes().add(groupTitlePane);
-//			groupTitlePane.prefWidthProperty().bind(parent.prefWidthProperty());
-//		}
-//	}
-
-	String selectedKey = "";
-
 	private Node buildLeftPane() {
-
 		Accordion accordion = new Accordion();
 		Set<String> keys = M3UService.getInstance().getChannels().keySet();
 		ScrollPane scrollPane = new ScrollPane();
 		scrollPane.setPrefWidth(250);
 		scrollPane.setContent(accordion);
-		int row = 0;
-
 		for (String key : keys) {
 			TitledPane titledPane = new TitledPane();
 			titledPane.setText(key);
 			titledPane.prefWidthProperty().bind(scrollPane.prefWidthProperty());
 			accordion.getPanes().add(titledPane);
 			titledPane.setExpanded(false);
-			titledPane.setOnMouseClicked(event -> {
-//				if (titledPane.isExpanded()) {
-//					titledPane.setContent(null);
-//					GridPane gridPane = new GridPane();
-//					List<Channel> channels = M3UService.getInstance().sortGroup(key);
-//					for (int i = 0; i < channels.size(); i++) {
-//						Node node = new ChannelView(channels.get(i));
-//						gridPane.add(node, 0, i);
-//					}
-//					gridPane.prefWidthProperty().bind(titledPane.prefWidthProperty());
-//					titledPane.setContent(gridPane);
-//					titledPane.setExpanded(true);
-//				} else {
-//					titledPane.setExpanded(false);
-//				}
-				// selectedKey = key;
-			});
 		}
 
 		accordion.expandedPaneProperty().addListener(new ChangeListener<TitledPane>() {
