@@ -23,8 +23,7 @@ public class M3UServiceTest {
 
 	@Test
 	public void testbuildChannels() throws Exception {
-		Map<String, List<Channel>> results = M3UService.getInstance().buildChannels(
-				"http://x.pro-ott.com:25443/get.php?username=arrex97566&password=LYXGOY8RSP&type=m3u_plus&output=ts");
+		Map<String, List<Channel>> results = M3UService.getInstance().buildChannels("tttt");
 		assertTrue(!results.isEmpty());
 	}
 

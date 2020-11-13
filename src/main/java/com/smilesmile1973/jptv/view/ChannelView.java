@@ -31,8 +31,6 @@ public class ChannelView extends GridPane {
 	private Channel channel;
 
 	public ChannelView(Channel channel) {
-		Insets insets = new Insets(2, 2, 2, 2);
-		this.setPadding(insets);
 		getStyleClass().add("channelView");
 		LOG.debug(channel.getTvLogo());
 		this.channel = channel;

@@ -102,6 +102,7 @@ public class Main extends Application {
 
 	private Parent buildRoot(Window owner) {
 		BorderPane root = new BorderPane();
+		root.setId("background");
 		root.setTop(buildTopPane(owner));
 		root.setLeft(buildLeftPane());
 		root.setCenter(buildCenterPane());
@@ -122,8 +123,8 @@ public class Main extends Application {
 		Accordion accordion = new Accordion();
 		Set<String> keys = M3UService.getInstance().getChannels().keySet();
 		ScrollPane scrollPane = new ScrollPane();
+		scrollPane.setId("scrollPaneAccordion");
 		scrollPane.setContent(accordion);
-		scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
 		for (String key : keys) {
 			TitledPane titledPane = new TitledPane();
 			titledPane.setText(key);
@@ -131,8 +132,8 @@ public class Main extends Application {
 			titledPane.setPrefWidth(260);
 			accordion.getPanes().add(titledPane);
 			titledPane.setExpanded(false);
+			
 		}
-
 		accordion.expandedPaneProperty().addListener(new ChangeListener<TitledPane>() {
 
 			@Override
@@ -143,7 +144,6 @@ public class Main extends Application {
 					titledPane.setContent(null);
 					TilePane pane = new TilePane();
 					pane.getStyleClass().add("tilePaneChannelView");
-					pane.setVgap(5);
 					List<Channel> channels = M3UService.getInstance().sortGroup(titledPane.getText());
 					for (int i = 0; i < channels.size(); i++) {
 						ChannelView channelView = new ChannelView(channels.get(i));

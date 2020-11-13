@@ -1,26 +1,58 @@
-.groupTitlePane {
-	-fx-vgap: 3.0px;
-	-fx-border-radius: 5.0px 5.0px 5.0px 5.0px;
-	-fx-background-radius: 5.0px 5.0px 5.0px 5.0px;
+ .accordion > .titled-pane {
+ 	-fx-padding: 2.0px;
+ }
+ 
+ .titled-pane 
+{
+	-fx-border-radius: 0;
+	-fx-background-radius:0;
+	-fx-border-style: none;
 }
 
+.titled-pane > .title {
+	-fx-border-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-background-radius: 5.0px 5.0px 5.0px 5.0px;
+    -fx-background-color: darkgray;
+    -fx-border-style: solid ;
+	-fx-border-color: lightgray;
+	-fx-border-width: 2.0px;
+}
 
+.titled-pane:collapsed > .title{
+	-fx-border-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-background-radius: 5.0px 5.0px 5.0px 5.0px;
+	
+}
 
+.titled-pane:expanded > .title{
+	-fx-border-radius: 5.0px 5.0px 0px 0px;
+	-fx-background-radius: 5.0px 5.0px 0px 0px;
+}
+ 
 .channelView {
 	-fx-border-radius: 5.0px 5.0px 5.0px 5.0px;
 	-fx-background-radius: 5.0px 5.0px 5.0px 5.0px;
 	-fx-border-style: solid ;
 	-fx-border-color: lightgray;
-	-fx-border-width: 2.0px;
+	-fx-border-width: 2.0px; 
 }
+
+.channelView:hover { 
+	-fx-effect: innershadow(two-pass-box , black , 10, 0.0 , 0 , 1 ); 
+}
+
+
 
 .tilePaneChannelView {
+	-fx-vgap: 2px;
 	-fx-background-color: black;
-	-fx-border-radius: 5px 5px 5px 5px;
-	-fx-background-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-border-color:  lightgray;
+	-fx-border-width: 0 2.0px 2.0px 2.0px;
+	-fx-background-radius: 0px 0px 5.0px 5.0px;
+	-fx-border-radius: 0px 0px 5.0px 5.0px;
 }
 
-.labelChannelView {
+.labelChannelView, .titled-pane {
 	-fx-alignment: center-left;
 	-fx-wrap-text: true;
 	-fx-font-family: sans-serif;
@@ -29,6 +61,20 @@
 	-fx-text-fill: white;
 }
 
-.channelView, .label {
+.channelView , .channelView > .label {
 	-fx-background-color: darkgray;
 }
+
+.background {
+	-fx-background-color: black;
+}
+
+#scrollPaneAccordion {
+	-fx-background-color: black;
+	-fx-hbar-policy: never ;	
+}
+
+#scrollPaneAccordion > .viewport {
+    -fx-background-color: black;
+}
+	
