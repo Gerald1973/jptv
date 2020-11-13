@@ -22,11 +22,10 @@ public class ChannelView extends GridPane {
 	private static final double LOGO_PANE_WIDTH = 50;
 	private static final double LOGO_PANE_HEIGHT = 50;
 	private static final double LOGO_IMAGE_WIDTH = 30;
-	private static final double LOGO_IMAGE_HEIGHT = 30;
+	private static final double LOGO_SIZE = 30;
+	private static final double LABEL_MAX_WIDTH = 190;
 
 	private static final Logger LOG = LoggerFactory.getLogger(ChannelView.class);
-
-	private ImageView imageView = new ImageView();
 
 	private Channel channel;
 
@@ -37,11 +36,14 @@ public class ChannelView extends GridPane {
 		// Logo
 		StackPane pane = new StackPane();
 		pane.setPrefSize(LOGO_PANE_WIDTH, LOGO_PANE_HEIGHT);
-		pane.getChildren().add(imageView);
-		loadImage(channel);
+		pane.setMaxSize(LOGO_PANE_WIDTH, LOGO_PANE_HEIGHT);
+		pane.getChildren().add(buildImageView(channel));
 		// Channel name
-		String txtLabel = channel.getTvgName().isBlank() ? "UNK" : channel.getTvgName();
-		Label label = new Label(txtLabel);
+		Label label = new Label(buildTextLabel());
+		label.setPrefWidth(LABEL_MAX_WIDTH);
+		label.setMaxWidth(LABEL_MAX_WIDTH);
+		label.setMinWidth(LABEL_MAX_WIDTH);
+		label.setWrapText(true);
 		label.setOnMouseClicked(event -> {
 			ChannelView channelView = ((ChannelView) ((Node) event.getSource()).getParent());
 			LOG.debug("Change to channel {}", channelView.getChannel().getChannelURL());
@@ -50,8 +52,10 @@ public class ChannelView extends GridPane {
 
 		ColumnConstraints col0 = new ColumnConstraints();
 		ColumnConstraints col1 = new ColumnConstraints();
-		col0.setPrefWidth(LOGO_IMAGE_WIDTH + 2);
-		col1.setPrefWidth(REMAINING);
+		col0.setPrefWidth(LOGO_IMAGE_WIDTH);
+		col1.setPrefWidth(LABEL_MAX_WIDTH);
+		col0.setMaxWidth(LOGO_IMAGE_WIDTH);
+		col1.setMaxWidth(LABEL_MAX_WIDTH);
 		this.getColumnConstraints().addAll(col0, col1);
 
 		this.add(pane, 0, 0);
@@ -68,12 +72,40 @@ public class ChannelView extends GridPane {
 		return this.channel;
 	}
 
-	public void loadImage(Channel channel) {
+	private String buildTextLabel() {
+		String result = channel.getTvgName().isBlank() ? "UNK" : channel.getTvgName();
+		if (!this.channel.getTvgName().isBlank()) {
+			result = channel.getTvgName();
+		} else if (!this.channel.getGroupTitle2().isBlank()) {
+			result = this.channel.getGroupTitle2();
+		} else {
+			result = "No name";
+		}
+		return result;
+	}
+
+	private ImageView buildImageView(Channel channel) {
+		ImageView result = new ImageView();
+		if (channel.getTvLogo() != null && !channel.getTvLogo().isBlank()) {
+			Image image = new Image(channel.getTvLogo(), true);
+			result.setImage(image);
+			if (image.getHeight() > image.getWidth()) {
+				result.setFitHeight(LOGO_SIZE);
+			} else {
+				result.setFitWidth(LOGO_SIZE);
+			}
+			result.setPreserveRatio(true);
+			result.setSmooth(true);
+		}
+		return result;
+	}
+
+	private void loadImage(Channel channel, ImageView imageView) {
 		if (channel.getTvLogo() != null && !channel.getTvLogo().isBlank()) {
 			Task<Void> task = new Task<Void>() {
 				@Override
 				protected Void call() throws Exception {
-					Image image = new Image(channel.getTvLogo(), LOGO_IMAGE_WIDTH, LOGO_IMAGE_HEIGHT, true, true);
+					Image image = new Image(channel.getTvLogo(), LOGO_IMAGE_WIDTH, LOGO_SIZE, true, true);
 					Platform.runLater(new Runnable() {
 						@Override
 						public void run() {

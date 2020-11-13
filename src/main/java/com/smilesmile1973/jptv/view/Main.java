@@ -26,6 +26,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -121,12 +122,13 @@ public class Main extends Application {
 		Accordion accordion = new Accordion();
 		Set<String> keys = M3UService.getInstance().getChannels().keySet();
 		ScrollPane scrollPane = new ScrollPane();
-		scrollPane.setPrefWidth(250);
 		scrollPane.setContent(accordion);
+		scrollPane.setHbarPolicy(ScrollBarPolicy.NEVER);
 		for (String key : keys) {
 			TitledPane titledPane = new TitledPane();
 			titledPane.setText(key);
-			titledPane.prefWidthProperty().bind(scrollPane.prefWidthProperty());
+			titledPane.setMaxWidth(260);
+			titledPane.setPrefWidth(260);
 			accordion.getPanes().add(titledPane);
 			titledPane.setExpanded(false);
 		}
@@ -141,10 +143,9 @@ public class Main extends Application {
 					GridPane gridPane = new GridPane();
 					List<Channel> channels = M3UService.getInstance().sortGroup(titledPane.getText());
 					for (int i = 0; i < channels.size(); i++) {
-						Node node = new ChannelView(channels.get(i));
-						gridPane.add(node, 0, i);
+						ChannelView channelView = new ChannelView(channels.get(i));
+						gridPane.add(channelView, 0, i);
 					}
-					gridPane.prefWidthProperty().bind(titledPane.prefWidthProperty());
 					titledPane.setContent(gridPane);
 				}
 			}

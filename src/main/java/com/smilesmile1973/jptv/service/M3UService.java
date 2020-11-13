@@ -70,9 +70,8 @@ public class M3UService {
 				Channel channel = ChannelConverter.getInstance().toTarget(sources);
 				if (channels.get(channel.getGroupTitle()) == null) {
 					channels.put(channel.getGroupTitle(), new ArrayList<Channel>());
-				} else {
-					channels.get(channel.getGroupTitle()).add(channel);
 				}
+				channels.get(channel.getGroupTitle()).add(channel);
 			}
 		}
 		return channels;
