@@ -70,8 +70,9 @@
     </dependency>
   </dependencies>
   <properties>
-    <maven.compiler.target>15</maven.compiler.target>
-    <maven.compiler.source>15</maven.compiler.source>
+    <maven.compiler.target>13</maven.compiler.target>
+    <maven.compiler.source>13</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <openjfx.version>15.0.1</openjfx.version>
   </properties>
 </project>
