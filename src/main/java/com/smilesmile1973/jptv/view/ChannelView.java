@@ -9,6 +9,7 @@ import com.smilesmile1973.jptv.pojo.Channel;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -30,14 +31,21 @@ public class ChannelView extends GridPane {
 	private Channel channel;
 
 	public ChannelView(Channel channel) {
+		Insets insets = new Insets(2, 2, 2, 2);
+		this.setPadding(insets);
 		getStyleClass().add("channelView");
 		LOG.debug(channel.getTvLogo());
 		this.channel = channel;
 		// Logo
 		StackPane pane = new StackPane();
+//		BackgroundFill bf = new BackgroundFill(Color.RED, null, null);
+//		Background ba = new Background(bf);
+//		pane.setBackground(ba);
 		pane.setPrefSize(LOGO_PANE_WIDTH, LOGO_PANE_HEIGHT);
 		pane.setMaxSize(LOGO_PANE_WIDTH, LOGO_PANE_HEIGHT);
-		pane.getChildren().add(buildImageView(channel));
+		ImageView imageView = new ImageView();
+		this.loadImage(channel, imageView);
+		pane.getChildren().add(imageView);
 		// Channel name
 		Label label = new Label(buildTextLabel());
 		label.setPrefWidth(LABEL_MAX_WIDTH);
@@ -105,7 +113,7 @@ public class ChannelView extends GridPane {
 			Task<Void> task = new Task<Void>() {
 				@Override
 				protected Void call() throws Exception {
-					Image image = new Image(channel.getTvLogo(), LOGO_IMAGE_WIDTH, LOGO_SIZE, true, true);
+					Image image = new Image(channel.getTvLogo(), LOGO_SIZE, LOGO_SIZE, true, true);
 					Platform.runLater(new Runnable() {
 						@Override
 						public void run() {

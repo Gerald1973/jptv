@@ -12,5 +12,6 @@
 
 .label {
 	-fx-alignment: center-left;
-	-fx-font-size: 12 px;
+	-fx-wrap-text: true;
+	-fx-font: 16px bold ;
 }

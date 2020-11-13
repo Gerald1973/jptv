@@ -30,9 +30,9 @@ import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.TilePane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
@@ -140,13 +140,14 @@ public class Main extends Application {
 					TitledPane titledPane) {
 				if (titledPane != null) {
 					titledPane.setContent(null);
-					GridPane gridPane = new GridPane();
+					TilePane pane = new TilePane();
+					pane.setVgap(5);
 					List<Channel> channels = M3UService.getInstance().sortGroup(titledPane.getText());
 					for (int i = 0; i < channels.size(); i++) {
 						ChannelView channelView = new ChannelView(channels.get(i));
-						gridPane.add(channelView, 0, i);
+						pane.getChildren().add(channelView);
 					}
-					titledPane.setContent(gridPane);
+					titledPane.setContent(pane);
 				}
 			}
 		});
