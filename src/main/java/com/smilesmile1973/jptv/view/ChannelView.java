@@ -9,6 +9,7 @@ import com.smilesmile1973.jptv.pojo.Channel;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -29,17 +30,22 @@ public class ChannelView extends GridPane {
 	private Channel channel;
 
 	public ChannelView(Channel channel) {
+		getStyleClass().add("channelView");
 		LOG.debug(channel.getTvLogo());
 		this.channel = channel;
 		// Logo
 		StackPane pane = new StackPane();
-		pane.getStyleClass().add("imageViewPane");
 		pane.setPrefSize(LOGO_PANE_WIDTH, LOGO_PANE_HEIGHT);
 		pane.getChildren().add(imageView);
 		loadImage(channel);
 		// Channel name
 		String txtLabel = channel.getTvgName().isBlank() ? "UNK" : channel.getTvgName();
 		Label label = new Label(txtLabel);
+		label.setOnMouseClicked(event -> {
+			ChannelView channelView = ((ChannelView) ((Node) event.getSource()).getParent());
+			LOG.debug("Change to channel {}", channelView.getChannel().getChannelURL());
+			Utils.getEventBus().post(new EventChannel(channel));
+		});
 
 		this.add(pane, 0, 0);
 		this.add(label, 1, 0);
@@ -64,8 +70,6 @@ public class ChannelView extends GridPane {
 					Platform.runLater(new Runnable() {
 						@Override
 						public void run() {
-							LOG.debug("Image height : {}", image.getHeight());
-							LOG.debug("Image width  : {}", image.getWidth());
 							if (image.getHeight() > 0 && image.getWidth() > 0) {
 								imageView.setX((LOGO_PANE_WIDTH - image.getWidth()) / 2);
 								imageView.setY((LOGO_PANE_HEIGHT - image.getHeight()) / 2);

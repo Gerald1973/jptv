@@ -3,26 +3,35 @@
  */
 package com.smilesmile1973.jptv.view;
 
+import java.util.List;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 import com.smilesmile1973.jptv.Utils;
 import com.smilesmile1973.jptv.event.EventChannel;
+import com.smilesmile1973.jptv.pojo.Channel;
 import com.smilesmile1973.jptv.service.M3UService;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
@@ -41,8 +50,6 @@ public class Main extends Application {
 	private final MediaPlayerFactory mediaPlayerFactory;
 
 	private EmbeddedMediaPlayer embeddedMediaPlayer;
-
-	private ImageView videoImageView;
 
 	public Main() {
 		this.mediaPlayerFactory = new MediaPlayerFactory();
@@ -71,10 +78,6 @@ public class Main extends Application {
 		try {
 			Utils.getEventBus().register(this);
 			M3UService.getInstance().buildChannels("https://iptv-org.github.io/iptv/languages/fra.m3u");
-			videoImageView = new ImageView();
-			this.videoImageView.setPreserveRatio(true);
-			embeddedMediaPlayer.videoSurface()
-					.set(ImageViewVideoSurfaceFactory.videoSurfaceForImageView(this.videoImageView));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -87,9 +90,6 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		ImageView videoImageView;
-		videoImageView = new ImageView();
-		videoImageView.setPreserveRatio(true);
 		Scene scene = new Scene(buildRoot(stage), 960, 540);
 		scene.getStylesheets().add(getClass().getClassLoader().getResource("styles.css").toExternalForm());
 		stage.setTitle("JPTV");
@@ -117,9 +117,71 @@ public class Main extends Application {
 		return menuBar;
 	}
 
+//	public ChannelAccordion() {
+//		Set<String> keys = M3UService.getInstance().getChannels().keySet();
+//		for (String string : keys) {
+//			GroupTitlePane groupTitlePane = new GroupTitlePane(string, this);
+//			getPanes().add(groupTitlePane);
+//			groupTitlePane.prefWidthProperty().bind(parent.prefWidthProperty());
+//		}
+//	}
+
+	String selectedKey = "";
+
 	private Node buildLeftPane() {
-		ScrollPane scrollPane = new ScrollPane(new ChannelAccordion());
+
+		Accordion accordion = new Accordion();
+		Set<String> keys = M3UService.getInstance().getChannels().keySet();
+		ScrollPane scrollPane = new ScrollPane();
+		scrollPane.setPrefWidth(250);
+		scrollPane.setContent(accordion);
+		int row = 0;
+
+		for (String key : keys) {
+			TitledPane titledPane = new TitledPane();
+			titledPane.setText(key);
+			titledPane.prefWidthProperty().bind(scrollPane.prefWidthProperty());
+			accordion.getPanes().add(titledPane);
+			titledPane.setExpanded(false);
+			titledPane.setOnMouseClicked(event -> {
+//				if (titledPane.isExpanded()) {
+//					titledPane.setContent(null);
+//					GridPane gridPane = new GridPane();
+//					List<Channel> channels = M3UService.getInstance().sortGroup(key);
+//					for (int i = 0; i < channels.size(); i++) {
+//						Node node = new ChannelView(channels.get(i));
+//						gridPane.add(node, 0, i);
+//					}
+//					gridPane.prefWidthProperty().bind(titledPane.prefWidthProperty());
+//					titledPane.setContent(gridPane);
+//					titledPane.setExpanded(true);
+//				} else {
+//					titledPane.setExpanded(false);
+//				}
+				// selectedKey = key;
+			});
+		}
+
+		accordion.expandedPaneProperty().addListener(new ChangeListener<TitledPane>() {
+
+			@Override
+			public void changed(ObservableValue<? extends TitledPane> observable, TitledPane oldValue,
+					TitledPane titledPane) {
+				if (titledPane != null) {
+					titledPane.setContent(null);
+					GridPane gridPane = new GridPane();
+					List<Channel> channels = M3UService.getInstance().sortGroup(titledPane.getText());
+					for (int i = 0; i < channels.size(); i++) {
+						Node node = new ChannelView(channels.get(i));
+						gridPane.add(node, 0, i);
+					}
+					gridPane.prefWidthProperty().bind(titledPane.prefWidthProperty());
+					titledPane.setContent(gridPane);
+				}
+			}
+		});
 		return scrollPane;
+
 	}
 
 	private Node buildTopPane(Window owner) {
@@ -129,9 +191,12 @@ public class Main extends Application {
 	}
 
 	private Node buildCenterPane() {
-		StackPane node = new StackPane();
+		Pane node = new Pane();
+		ImageView videoImageView = new ImageView();
 		videoImageView.fitWidthProperty().bind(node.widthProperty());
 		videoImageView.fitHeightProperty().bind(node.heightProperty());
+		videoImageView.setPreserveRatio(true);
+		embeddedMediaPlayer.videoSurface().set(ImageViewVideoSurfaceFactory.videoSurfaceForImageView(videoImageView));
 		node.widthProperty().addListener((observableValue, oldValue, newValue) -> {
 			// If you need to know about resizes
 		});
@@ -149,4 +214,10 @@ public class Main extends Application {
 		embeddedMediaPlayer.media().play(eventChannel.getChannel().getChannelURL());
 	}
 
+	@Override
+	public void stop() throws Exception {
+		super.stop();
+		embeddedMediaPlayer.release();
+		mediaPlayerFactory.release();
+	}
 }

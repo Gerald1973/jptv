@@ -8,11 +8,9 @@ import org.slf4j.LoggerFactory;
 import com.smilesmile1973.jptv.pojo.Channel;
 import com.smilesmile1973.jptv.service.M3UService;
 
-import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -28,7 +26,6 @@ public class GroupTitlePane extends TitledPane {
 		this.setText(title);
 		Pane stackPane = new StackPane();
 		this.setContent(stackPane);
-
 		stackPane.getChildren().add(getVbox(title));
 		LOG.debug("Expanded : {}", this.isExpanded());
 		this.setOnMouseClicked(event -> {
@@ -38,25 +35,15 @@ public class GroupTitlePane extends TitledPane {
 		});
 	}
 
-	private Node buildFlowPane(String group) {
-		FlowPane flowPane = new FlowPane();
-		flowPane.setOrientation(Orientation.VERTICAL);
-		List<Channel> channels = M3UService.getInstance().sortGroup(group);
-		for (Channel channel : channels) {
-			ChannelView channelView = new ChannelView(channel);
-			flowPane.getChildren().add(channelView);
-		}
-		return flowPane;
-	}
-
 	private Node buildGridPane(String group) {
-		GridPane flowPane = new GridPane();
+		GridPane gridPane = new GridPane();
+		gridPane.getStyleClass().add("groupTitlePane");
 		List<Channel> channels = M3UService.getInstance().sortGroup(group);
 		for (int i = 0; i < channels.size(); i++) {
 			Node node = new ChannelView(channels.get(i));
-			flowPane.add(node, 0, i);
+			gridPane.add(node, 0, i);
 		}
-		return flowPane;
+		return gridPane;
 	}
 
 	private Node getVbox(String group) {
@@ -64,14 +51,4 @@ public class GroupTitlePane extends TitledPane {
 		scrollPane.setContent(vbox);
 		return scrollPane;
 	}
-
-	private Node fillVbox(String group) {
-		List<Channel> channels = M3UService.getInstance().sortGroup(group);
-		for (Channel channel : channels) {
-			ChannelView channelView = new ChannelView(channel);
-			this.vbox.getChildren().add(channelView);
-		}
-		return this.vbox;
-	}
-
 }
