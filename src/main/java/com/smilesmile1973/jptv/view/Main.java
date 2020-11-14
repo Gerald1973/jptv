@@ -80,7 +80,7 @@ public class Main extends Application {
 	public void init() {
 		try {
 			Utils.getEventBus().register(this);
-			M3UService.getInstance().buildChannels("https://iptv-org.github.io/iptv/languages/fra.m3u");
+			M3UService.getInstance().buildChannels(getParameters().getRaw().get(0));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
