@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
+import com.smilesmile1973.jptv.Constants;
 import com.smilesmile1973.jptv.Utils;
 import com.smilesmile1973.jptv.event.EventChannel;
 import com.smilesmile1973.jptv.pojo.Channel;
@@ -26,7 +27,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -51,7 +52,7 @@ public class Main extends Application {
 	private final MediaPlayerFactory mediaPlayerFactory;
 
 	private EmbeddedMediaPlayer embeddedMediaPlayer;
-
+	
 	public Main() {
 		this.mediaPlayerFactory = new MediaPlayerFactory();
 		this.embeddedMediaPlayer = mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
@@ -91,7 +92,7 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		Scene scene = new Scene(buildRoot(stage), 960, 540);
+		Scene scene = new Scene(buildRoot(stage), Constants.STAGE_WIDTH, Constants.STAGE_HEIGHT);
 		scene.getStylesheets().add(getClass().getClassLoader().getResource("styles.css").toExternalForm());
 		stage.setTitle("JPTV");
 		stage.setScene(scene);
@@ -104,8 +105,11 @@ public class Main extends Application {
 		BorderPane root = new BorderPane();
 		root.setId("background");
 		root.setTop(buildTopPane(owner));
-		root.setLeft(buildLeftPane());
-		root.setCenter(buildCenterPane());
+		Node left = buildLeftPane();
+		Node right = buildCenterPane();
+		SplitPane splitPane = new SplitPane(left,right);
+		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH/Constants.STAGE_WIDTH);
+		root.setCenter(splitPane);
 		return root;
 	}
 
@@ -128,8 +132,8 @@ public class Main extends Application {
 		for (String key : keys) {
 			TitledPane titledPane = new TitledPane();
 			titledPane.setText(key);
-			titledPane.setMaxWidth(260);
-			titledPane.setPrefWidth(260);
+			titledPane.setMaxWidth(Constants.CHANNEL_LIST_WIDTH);
+			titledPane.setPrefWidth(Constants.CHANNEL_LIST_WIDTH);
 			accordion.getPanes().add(titledPane);
 			titledPane.setExpanded(false);
 			
@@ -153,6 +157,8 @@ public class Main extends Application {
 				}
 			}
 		});
+		scrollPane.setMinWidth(0);
+		scrollPane.setMaxWidth(Constants.CHANNEL_LIST_WIDTH);
 		return scrollPane;
 
 	}
