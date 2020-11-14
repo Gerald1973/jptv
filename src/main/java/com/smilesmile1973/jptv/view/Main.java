@@ -59,6 +59,7 @@ public class Main extends Application {
 		this.embeddedMediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
 			@Override
 			public void playing(MediaPlayer mediaPlayer) {
+
 			}
 
 			@Override
@@ -174,15 +175,16 @@ public class Main extends Application {
 		ImageView videoImageView = new ImageView();
 		videoImageView.fitWidthProperty().bind(node.widthProperty());
 		videoImageView.fitHeightProperty().bind(node.heightProperty());
-		videoImageView.setPreserveRatio(true);
+		
 		embeddedMediaPlayer.videoSurface().set(ImageViewVideoSurfaceFactory.videoSurfaceForImageView(videoImageView));
+		
 		node.widthProperty().addListener((observableValue, oldValue, newValue) -> {
-			// If you need to know about resizes
 		});
+		
 
 		node.heightProperty().addListener((observableValue, oldValue, newValue) -> {
-			// If you need to know about resizes
 		});
+			
 		node.getChildren().add(videoImageView);
 		return node;
 	}
