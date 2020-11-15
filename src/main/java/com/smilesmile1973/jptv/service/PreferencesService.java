@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.smilesmile1973.jptv.controller;
+package com.smilesmile1973.jptv.service;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,14 +27,14 @@ import org.slf4j.LoggerFactory;
  * @author smilesmile1973@gmail.com
  *
  */
-public class PreferencesCtrl {
+public class PreferencesService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(PreferencesCtrl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(PreferencesService.class);
 
 	/**
 	 * The instance, singleton pattern
 	 */
-	private static PreferencesCtrl instance;
+	private static PreferencesService instance;
 
 	/**
 	 * The name of the configuration file
@@ -55,19 +55,24 @@ public class PreferencesCtrl {
 	 * 
 	 * @return the instance of this class.
 	 */
-	public static final PreferencesCtrl getInstance() {
+	public static final PreferencesService getInstance() {
 		if (instance == null) {
-			instance = new PreferencesCtrl();
+			instance = new PreferencesService();
 		}
 		return instance;
 	}
 
-	private PreferencesCtrl() {
+	private PreferencesService() {
 	}
 
 	private String buildProperty(String key, String value) {
 		StringBuilder sb = new StringBuilder(key.trim()).append("=").append(value.trim());
 		return sb.toString();
+	}
+	
+	public boolean preferencesFileExists() {
+		File file = new File(CONFIG_FILE);
+		return file.exists();
 	}
 
 	/**
@@ -76,9 +81,10 @@ public class PreferencesCtrl {
 	 * This method read a property from the {@link #PREFERENCES}. If the
 	 * configuration file doesn't exist, then an empty value is returned, otherwise
 	 * the value is returned.
+	 * If the property file exists but not the property, an empty value is returned.
 	 * 
-	 * @param key
-	 * @return
+	 * @param key 
+	 * @return returns the property or an empty {@link String}.
 	 */
 	public String readProperty(String key) throws IOException {
 		File file = new File(CONFIG_FILE);
@@ -121,7 +127,7 @@ public class PreferencesCtrl {
 
 	/**
 	 * This method write a property in the configuration file. If the configuration
-	 * file is not present the file wil be created automatically.
+	 * file is not present the file will be created.
 	 * 
 	 * @param key   the property key
 	 * @param value the value

@@ -9,13 +9,16 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.google.common.eventbus.Subscribe;
 import com.smilesmile1973.jptv.Constants;
 import com.smilesmile1973.jptv.Utils;
+import com.smilesmile1973.jptv.event.ChannelListCreatedEvent;
 import com.smilesmile1973.jptv.event.EventChannel;
 import com.smilesmile1973.jptv.event.RendererCreatedEvent;
 import com.smilesmile1973.jptv.pojo.Channel;
 import com.smilesmile1973.jptv.service.M3UService;
+import com.smilesmile1973.jptv.service.PreferencesService;
 import com.sun.jna.ptr.IntByReference;
 
 import javafx.application.Application;
@@ -72,7 +75,7 @@ public class Main extends Application {
 		this.embeddedMediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
 			@Override
 			public void paused(MediaPlayer mediaPlayer) {
-				LOG.debug("Media player paused");
+				// LOG.debug("Media player paused");
 			}
 
 			@Override
@@ -82,12 +85,12 @@ public class Main extends Application {
 
 			@Override
 			public void stopped(MediaPlayer mediaPlayer) {
-				LOG.debug("Media player stopped");
+				// LOG.debug("Media player stopped");
 			}
 
 			@Override
 			public void timeChanged(MediaPlayer mediaPlayer, long newTime) {
-				LOG.debug("Media player time changed");
+				// LOG.debug("Media player time changed");
 			}
 		});
 	}
@@ -132,7 +135,6 @@ public class Main extends Application {
 			titledPane.setPrefWidth(Constants.CHANNEL_LIST_WIDTH);
 			accordion.getPanes().add(titledPane);
 			titledPane.setExpanded(false);
-
 		}
 		accordion.expandedPaneProperty().addListener(new ChangeListener<TitledPane>() {
 
@@ -169,13 +171,15 @@ public class Main extends Application {
 		return menuBar;
 	}
 
+	Node leftPane;
+
 	private Parent buildRoot(Window owner) {
 		BorderPane root = new BorderPane();
 		root.setId("background");
 		root.setTop(buildTopPane(owner));
-		Node left = buildLeftPane();
+		leftPane = buildLeftPane();
 		Node right = buildCenterPane();
-		SplitPane splitPane = new SplitPane(left, right);
+		SplitPane splitPane = new SplitPane(leftPane, right);
 		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
 		root.setCenter(splitPane);
 		return root;
@@ -192,17 +196,34 @@ public class Main extends Application {
 		LOG.debug("Change channel to {}:", eventChannel.getChannel().getChannelURL());
 		embeddedMediaPlayer.media().play(eventChannel.getChannel().getChannelURL());
 	}
-	
+
 	@Subscribe
 	public void rendererCreated(RendererCreatedEvent event) {
 		placeVideoImage(videoImageView, true);
 	}
 
+	@Subscribe
+	public void refreshLeftPane(ChannelListCreatedEvent event) {
+		this.leftPane = buildLeftPane();
+	}
+
 	@Override
 	public void init() {
+		Utils.getEventBus().register(this);
+	}
+
+	private void initChannels(Window owner) {
 		try {
-			Utils.getEventBus().register(this);
-			M3UService.getInstance().buildChannels(getParameters().getRaw().get(0));
+			if (!getParameters().getRaw().isEmpty() && !Strings.isNullOrEmpty(getParameters().getRaw().get(0))) {
+				M3UService.getInstance().buildChannels(getParameters().getRaw().get(0));
+			} else {
+				String mp3Ulist = PreferencesService.getInstance().readProperty(PreferencesService.KEY_IPTV_M3U);
+				if (!mp3Ulist.isBlank()) {
+					M3UService.getInstance().buildChannels(mp3Ulist);
+				} else {
+					new Preferences(owner);
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -234,14 +255,22 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
+		initChannels(stage);
 		Scene scene = new Scene(buildRoot(stage), Constants.STAGE_WIDTH, Constants.STAGE_HEIGHT);
 		scene.getStylesheets().add(getClass().getClassLoader().getResource("styles.css").toExternalForm());
 		stage.setTitle("JPTV");
 		stage.setScene(scene);
 		stage.show();
-		boolean playing = embeddedMediaPlayer.media().play(getParameters().getRaw().get(0));
+		boolean playing = false;
+		if (!getParameters().getRaw().isEmpty()) {
+			playing = embeddedMediaPlayer.media().play(getParameters().getRaw().get(0));
+		} else {
+			if (!PreferencesService.getInstance().readProperty(PreferencesService.KEY_IPTV_M3U).isBlank()) {
+				playing = embeddedMediaPlayer.media()
+						.play(PreferencesService.getInstance().readProperty(PreferencesService.KEY_IPTV_M3U));
+			}
+		}
 		LOG.debug("Playing ok ? {}", playing);
-		embeddedMediaPlayer.controls().setPosition(0.4f);
 	}
 
 	@Override

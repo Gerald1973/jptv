@@ -5,7 +5,10 @@ package com.smilesmile1973.jptv.view;
 
 import java.io.IOException;
 
-import com.smilesmile1973.jptv.controller.PreferencesCtrl;
+import com.smilesmile1973.jptv.Utils;
+import com.smilesmile1973.jptv.event.ChannelListCreatedEvent;
+import com.smilesmile1973.jptv.service.M3UService;
+import com.smilesmile1973.jptv.service.PreferencesService;
 
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -39,20 +42,28 @@ public class Preferences extends Stage {
 		txtUrl = new TextField();
 		buttonCancel.setOnAction(actionEvent -> this.close());
 		try {
-			txtUrl.setText(PreferencesCtrl.getInstance().readProperty(PreferencesCtrl.KEY_IPTV_M3U));
+			txtUrl.setText(PreferencesService.getInstance().readProperty(PreferencesService.KEY_IPTV_M3U));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		buttonOk.setOnAction(actionEvent -> {
-			String key = PreferencesCtrl.KEY_IPTV_M3U;
-			String value = txtUrl.getText();
-			try {
-				PreferencesCtrl.getInstance().writeProperty(key, value);
-				this.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		});
+		buttonOk.setOnAction(actionEvent -> onOk());
+	}
+
+	private void onOk() {
+		String key = PreferencesService.KEY_IPTV_M3U;
+		String value = txtUrl.getText();
+		try {
+			PreferencesService.getInstance().writeProperty(key, value);
+			this.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			M3UService.getInstance().buildChannels(PreferencesService.getInstance().readProperty(PreferencesService.KEY_IPTV_M3U));
+			Utils.getEventBus().post(new ChannelListCreatedEvent(true));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private Parent buildRoot() {
@@ -73,6 +84,6 @@ public class Preferences extends Stage {
 		Scene scene = new Scene(buildRoot());
 		this.setScene(scene);
 		this.initModality(Modality.WINDOW_MODAL);
-		show();
+		this.showAndWait();
 	}
 }
