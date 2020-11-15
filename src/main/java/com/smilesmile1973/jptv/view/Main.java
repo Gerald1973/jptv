@@ -13,6 +13,7 @@ import com.google.common.eventbus.Subscribe;
 import com.smilesmile1973.jptv.Constants;
 import com.smilesmile1973.jptv.Utils;
 import com.smilesmile1973.jptv.event.EventChannel;
+import com.smilesmile1973.jptv.event.RendererCreatedEvent;
 import com.smilesmile1973.jptv.pojo.Channel;
 import com.smilesmile1973.jptv.service.M3UService;
 import com.sun.jna.ptr.IntByReference;
@@ -52,25 +53,31 @@ public class Main extends Application {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
+	public static void main(String[] args) {
+		LOG.info("JPTV starting.");
+		launch(args);
+	}
+
 	private final MediaPlayerFactory mediaPlayerFactory;
 
 	private EmbeddedMediaPlayer embeddedMediaPlayer;
 
 	private boolean keepRatio = true;
 
+	private ImageView videoImageView = new ImageView();
+
 	public Main() {
 		this.mediaPlayerFactory = new MediaPlayerFactory();
 		this.embeddedMediaPlayer = mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
 		this.embeddedMediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
 			@Override
-			public void playing(MediaPlayer mediaPlayer) {
-				LOG.debug("Media player playing");
-				placeVideoImage(videoImageView, keepRatio);
+			public void paused(MediaPlayer mediaPlayer) {
+				LOG.debug("Media player paused");
 			}
 
 			@Override
-			public void paused(MediaPlayer mediaPlayer) {
-				LOG.debug("Media player paused");
+			public void playing(MediaPlayer mediaPlayer) {
+				LOG.debug("Media player playing");
 			}
 
 			@Override
@@ -85,52 +92,30 @@ public class Main extends Application {
 		});
 	}
 
-	@Override
-	public void init() {
-		try {
-			Utils.getEventBus().register(this);
-			M3UService.getInstance().buildChannels(getParameters().getRaw().get(0));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	private Node buildCenterPane() {
+		Pane node = new Pane();
+		embeddedMediaPlayer.videoSurface().set(ImageViewVideoSurfaceFactory.videoSurfaceForImageView(videoImageView));
 
-	public static void main(String[] args) {
-		LOG.info("JPTV starting.");
-		launch(args);
-	}
+		node.widthProperty().addListener((observableValue, oldValue, newValue) -> {
+			if (keepRatio) {
+				placeVideoImage(videoImageView, keepRatio);
+			} else {
+				videoImageView.fitHeightProperty().set(node.getHeight());
+				videoImageView.fitWidthProperty().set(newValue.doubleValue());
+			}
+		});
 
-	@Override
-	public void start(Stage stage) throws Exception {
-		Scene scene = new Scene(buildRoot(stage), Constants.STAGE_WIDTH, Constants.STAGE_HEIGHT);
-		scene.getStylesheets().add(getClass().getClassLoader().getResource("styles.css").toExternalForm());
-		stage.setTitle("JPTV");
-		stage.setScene(scene);
-		stage.show();
-		embeddedMediaPlayer.media().play(getParameters().getRaw().get(0));
-		embeddedMediaPlayer.controls().setPosition(0.4f);
-	}
+		node.heightProperty().addListener((observableValue, oldValue, newValue) -> {
+			if (!keepRatio) {
+				videoImageView.fitHeightProperty().set(node.getHeight());
+				videoImageView.fitWidthProperty().set(newValue.doubleValue());
+			} else {
+				placeVideoImage(videoImageView, keepRatio);
+			}
+		});
 
-	private Parent buildRoot(Window owner) {
-		BorderPane root = new BorderPane();
-		root.setId("background");
-		root.setTop(buildTopPane(owner));
-		Node left = buildLeftPane();
-		Node right = buildCenterPane();
-		SplitPane splitPane = new SplitPane(left, right);
-		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
-		root.setCenter(splitPane);
-		return root;
-	}
-
-	private Node buildMenu(Window owner) {
-		MenuBar menuBar = new MenuBar();
-		MenuItem configuration = new MenuItem("Configuration");
-		configuration.setOnAction(actionEvent -> new Preferences(owner));
-		Menu preferences = new Menu("Preferences");
-		preferences.getItems().add(configuration);
-		menuBar.getMenus().add(preferences);
-		return menuBar;
+		node.getChildren().add(videoImageView);
+		return node;
 	}
 
 	private Node buildLeftPane() {
@@ -173,38 +158,53 @@ public class Main extends Application {
 
 	}
 
+	private Node buildMenu(Window owner) {
+		MenuBar menuBar = new MenuBar();
+		MenuItem configuration = new MenuItem("Configuration");
+		configuration.setOnAction(actionEvent -> new Preferences(owner));
+		Menu preferences = new Menu("Preferences");
+		preferences.getItems().add(configuration);
+		menuBar.getMenus().add(preferences);
+		return menuBar;
+	}
+
+	private Parent buildRoot(Window owner) {
+		BorderPane root = new BorderPane();
+		root.setId("background");
+		root.setTop(buildTopPane(owner));
+		Node left = buildLeftPane();
+		Node right = buildCenterPane();
+		SplitPane splitPane = new SplitPane(left, right);
+		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
+		root.setCenter(splitPane);
+		return root;
+	}
+
 	private Node buildTopPane(Window owner) {
 		HBox hbox = new HBox();
 		hbox.getChildren().add(buildMenu(owner));
 		return hbox;
 	}
 
-	private ImageView videoImageView = new ImageView();
+	@Subscribe
+	public void changeChannel(EventChannel eventChannel) {
+		LOG.debug("Change channel to {}:", eventChannel.getChannel().getChannelURL());
+		embeddedMediaPlayer.media().play(eventChannel.getChannel().getChannelURL());
+	}
+	
+	@Subscribe
+	public void rendererCreated(RendererCreatedEvent event) {
+		placeVideoImage(videoImageView, true);
+	}
 
-	private Node buildCenterPane() {
-		Pane node = new Pane();
-		embeddedMediaPlayer.videoSurface().set(ImageViewVideoSurfaceFactory.videoSurfaceForImageView(videoImageView));
-
-		node.widthProperty().addListener((observableValue, oldValue, newValue) -> {
-			if (keepRatio) {
-				placeVideoImage(videoImageView, keepRatio);
-			} else {
-				videoImageView.fitHeightProperty().set(node.getHeight());
-				videoImageView.fitWidthProperty().set(newValue.doubleValue());
-			}
-		});
-
-		node.heightProperty().addListener((observableValue, oldValue, newValue) -> {
-			if (!keepRatio) {
-				videoImageView.fitHeightProperty().set(node.getHeight());
-				videoImageView.fitWidthProperty().set(newValue.doubleValue());
-			} else {
-				placeVideoImage(videoImageView, keepRatio);
-			}
-		});
-
-		node.getChildren().add(videoImageView);
-		return node;
+	@Override
+	public void init() {
+		try {
+			Utils.getEventBus().register(this);
+			M3UService.getInstance().buildChannels(getParameters().getRaw().get(0));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void placeVideoImage(ImageView imageView, boolean keepRatio) {
@@ -218,7 +218,6 @@ public class Main extends Application {
 			double videoWidth = px.getValue();
 			double videoHeight = py.getValue();
 			double scaleWidth = imageViewWidth / videoWidth;
-			double scaleHeight = imageViewHeight / videoHeight;
 			double imageViewWidthScaled = scaleWidth * videoWidth;
 			double imageViewHeightScaled = scaleWidth * videoHeight;
 			double y = (imageViewHeight - imageViewHeightScaled) / 2.0;
@@ -232,10 +231,16 @@ public class Main extends Application {
 		}
 	}
 
-	@Subscribe
-	public void changeChannel(EventChannel eventChannel) {
-		LOG.debug("Change channel to {}:", eventChannel.getChannel().getChannelURL());
-		embeddedMediaPlayer.media().play(eventChannel.getChannel().getChannelURL());
+	@Override
+	public void start(Stage stage) throws Exception {
+		Scene scene = new Scene(buildRoot(stage), Constants.STAGE_WIDTH, Constants.STAGE_HEIGHT);
+		scene.getStylesheets().add(getClass().getClassLoader().getResource("styles.css").toExternalForm());
+		stage.setTitle("JPTV");
+		stage.setScene(scene);
+		stage.show();
+		boolean playing = embeddedMediaPlayer.media().play(getParameters().getRaw().get(0));
+		LOG.debug("Playing ok ? {}", playing);
+		embeddedMediaPlayer.controls().setPosition(0.4f);
 	}
 
 	@Override
