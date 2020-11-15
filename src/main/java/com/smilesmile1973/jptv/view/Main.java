@@ -93,29 +93,30 @@ public class Main extends Application {
 	}
 
 	private Node buildCenterPane() {
-		Pane node = new Pane();
+		Pane videoPane = new Pane();
+		videoPane.setId("videoPane");
 		embeddedMediaPlayer.videoSurface().set(ImageViewVideoSurfaceFactory.videoSurfaceForImageView(videoImageView));
 
-		node.widthProperty().addListener((observableValue, oldValue, newValue) -> {
+		videoPane.widthProperty().addListener((observableValue, oldValue, newValue) -> {
 			if (keepRatio) {
 				placeVideoImage(videoImageView, keepRatio);
 			} else {
-				videoImageView.fitHeightProperty().set(node.getHeight());
+				videoImageView.fitHeightProperty().set(videoPane.getHeight());
 				videoImageView.fitWidthProperty().set(newValue.doubleValue());
 			}
 		});
 
-		node.heightProperty().addListener((observableValue, oldValue, newValue) -> {
+		videoPane.heightProperty().addListener((observableValue, oldValue, newValue) -> {
 			if (!keepRatio) {
-				videoImageView.fitHeightProperty().set(node.getHeight());
+				videoImageView.fitHeightProperty().set(videoPane.getHeight());
 				videoImageView.fitWidthProperty().set(newValue.doubleValue());
 			} else {
 				placeVideoImage(videoImageView, keepRatio);
 			}
 		});
 
-		node.getChildren().add(videoImageView);
-		return node;
+		videoPane.getChildren().add(videoImageView);
+		return videoPane;
 	}
 
 	private Node buildLeftPane() {
