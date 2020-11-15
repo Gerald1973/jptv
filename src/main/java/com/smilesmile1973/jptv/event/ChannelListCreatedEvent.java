@@ -9,6 +9,6 @@ public class ChannelListCreatedEvent {
 	}
 
 	public ChannelListCreatedEvent(boolean created){
-		created = true;
+		this.created = created;
 	}
 }

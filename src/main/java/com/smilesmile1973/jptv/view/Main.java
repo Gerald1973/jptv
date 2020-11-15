@@ -95,7 +95,7 @@ public class Main extends Application {
 		});
 	}
 
-	private Node buildCenterPane() {
+	private Node buildRightSplit() {
 		Pane videoPane = new Pane();
 		videoPane.setId("videoPane");
 		embeddedMediaPlayer.videoSurface().set(ImageViewVideoSurfaceFactory.videoSurfaceForImageView(videoImageView));
@@ -122,7 +122,7 @@ public class Main extends Application {
 		return videoPane;
 	}
 
-	private Node buildLeftPane() {
+	private Node buildLeftSplit() {
 		Accordion accordion = new Accordion();
 		Set<String> keys = M3UService.getInstance().getChannels().keySet();
 		ScrollPane scrollPane = new ScrollPane();
@@ -171,15 +171,17 @@ public class Main extends Application {
 		return menuBar;
 	}
 
-	Node leftPane;
+	
+	
+	private BorderPane root;
 
 	private Parent buildRoot(Window owner) {
-		BorderPane root = new BorderPane();
+		root = new BorderPane();
 		root.setId("background");
 		root.setTop(buildTopPane(owner));
-		leftPane = buildLeftPane();
-		Node right = buildCenterPane();
-		SplitPane splitPane = new SplitPane(leftPane, right);
+		Node left = buildLeftSplit();
+		Node right = buildRightSplit();
+		SplitPane splitPane = new SplitPane(left, right);
 		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
 		root.setCenter(splitPane);
 		return root;
@@ -203,8 +205,15 @@ public class Main extends Application {
 	}
 
 	@Subscribe
-	public void refreshLeftPane(ChannelListCreatedEvent event) {
-		this.leftPane = buildLeftPane();
+	public void refreshCenter(ChannelListCreatedEvent event) {
+		if (event.isCreated()) {
+			root.setCenter(null);
+			Node left = buildLeftSplit();
+			Node right = buildRightSplit();
+			SplitPane splitPane = new SplitPane(left, right);
+			splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
+			root.setCenter(splitPane);
+		}
 	}
 
 	@Override
