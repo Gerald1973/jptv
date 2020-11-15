@@ -34,6 +34,9 @@ import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32Buffe
 
 import java.nio.ByteBuffer;
 
+import com.smilesmile1973.jptv.Utils;
+import com.smilesmile1973.jptv.event.RendererCreatedEvent;
+
 import static uk.co.caprica.vlcj.player.embedded.videosurface.VideoSurfaceAdapters.getVideoSurfaceAdapter;
 
 /**
@@ -90,7 +93,10 @@ public final class ImageViewVideoSurfaceFactory {
     private class PixelBufferRenderCallback implements RenderCallback {
         @Override
         public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
-            Platform.runLater(() -> pixelBuffer.updateBuffer(pb -> null));
+            Platform.runLater(() -> pixelBuffer.updateBuffer(pb -> {
+            	Utils.getEventBus().post(new RendererCreatedEvent(true));
+            	return null;
+            }));
         }
     }
 

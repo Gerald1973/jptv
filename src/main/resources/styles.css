@@ -77,4 +77,8 @@
 #scrollPaneAccordion > .viewport {
     -fx-background-color: black;
 }
+
+#videoPane {
+	 -fx-background-color: black;
+}
 	
