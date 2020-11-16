@@ -207,7 +207,6 @@ public class Main extends Application {
 	@Subscribe
 	public void refreshCenter(ChannelListCreatedEvent event) {
 		if (event.isCreated()) {
-			root.setCenter(null);
 			Node left = buildLeftSplit();
 			Node right = buildRightSplit();
 			SplitPane splitPane = new SplitPane(left, right);

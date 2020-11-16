@@ -61,6 +61,7 @@ public class M3UService {
 	}
 
 	public Map<String, List<Channel>> buildChannels(String url) throws Exception {
+		channels.clear();
 		List<String> strings = fetchWebSite(url);
 		String[] sources = new String[2];
 		if (strings != null && !strings.isEmpty() && strings.get(0).equals("#EXTM3U")) {
