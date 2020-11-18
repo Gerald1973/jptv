@@ -20,6 +20,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -44,7 +45,6 @@ public class Preferences extends Stage {
 		buttonCancel.getStyleClass().add("buttonPreferences");
 		buttonOk = new Button("Ok");
 		buttonOk.getStyleClass().add("buttonPreferences");
-		
 		lblUrl = new Label("URL M3U");
 		txtUrl = new TextField();
 		buttonCancel.setOnAction(actionEvent -> this.close());
@@ -76,31 +76,32 @@ public class Preferences extends Stage {
 	private Parent buildRoot() {
 		StackPane pane = new StackPane();
 		pane.setId("panePreferences");
-		GridPane node = new GridPane();
+		
 		ColumnConstraints cc0 = new ColumnConstraints();
 		ColumnConstraints cc1 = new ColumnConstraints();
 		ColumnConstraints cc2 = new ColumnConstraints();
 		cc2.setHalignment(HPos.RIGHT);
 		cc2.setHgrow(Priority.ALWAYS);
-	    node.setPrefWidth(600);
-		node.add(lblUrl, 0, 0,1,1);
-		node.add(txtUrl, 1, 0,2,1);
-		node.add(buttonOk, 0, 1);
-		node.add(buttonCancel, 2, 1);
-		node.getColumnConstraints().setAll(cc0,cc1,cc2);
-		pane.getChildren().add(node);
-		node.getColumnConstraints().setAll(cc0,cc1,cc2);
+		GridPane gridPane = new GridPane();
+		gridPane.getStyleClass().add("gridPanePreferences");
+	    gridPane.setPrefWidth(600);
+		gridPane.add(lblUrl, 0, 0,1,1);
+		gridPane.add(txtUrl, 1, 0,2,1);
+		gridPane.add(buttonOk, 0, 1);
+		gridPane.add(buttonCancel, 2, 1);
+		gridPane.getColumnConstraints().setAll(cc0,cc1,cc2);
+		pane.getChildren().add(gridPane);
 		return pane;
 	}
 
 	public Preferences(Window owner) {
 		init();
 		this.initOwner(owner);
-		setTitle("Preferences");
+		this.initStyle(StageStyle.TRANSPARENT);
 		Scene scene = new Scene(buildRoot());
 		scene.getStylesheets().add(getClass().getClassLoader().getResource("styles.css").toExternalForm());
+		scene.setFill(Color.TRANSPARENT);
 		this.setScene(scene);
-		this.initStyle(StageStyle.UNDECORATED);
 		this.initModality(Modality.WINDOW_MODAL);
 		this.showAndWait();
 	}
