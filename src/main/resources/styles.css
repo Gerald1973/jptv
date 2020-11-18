@@ -37,7 +37,7 @@
 	-fx-border-width: 2.0px; 
 }
 
-.channelView:hover { 
+.channelView:hover, .buttonPreferences:hover { 
 	-fx-effect: innershadow(two-pass-box , black , 10, 0.0 , 0 , 1 ); 
 }
 
@@ -52,7 +52,7 @@
 	-fx-border-radius: 0px 0px 5.0px 5.0px;
 }
 
-.labelChannelView, .titled-pane {
+.labelChannelView, .titled-pane, .gridPanePreferences > .label {
 	-fx-alignment: center-left;
 	-fx-wrap-text: true;
 	-fx-font-family: sans-serif;
@@ -80,5 +80,36 @@
 
 #videoPane {
 	 -fx-background-color: black;
+}
+
+#panePreferences {
+	-fx-padding: 20.0px 20.0px 20.0px 20.0px;
+	-fx-border-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-background-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-border-style: solid ;
+	-fx-border-color: lightgray;
+	-fx-background-color: darkgray;
+	-fx-border-width: 2.0px; 
+}
+
+.buttonPreferences {
+	-fx-padding: 2.0px 2.0px 2.0px 2.0px;
+	-fx-background-color: darkgray;
+	
+	-fx-border-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-border-color: lightgray;
+	-fx-border-style: solid ;
+	-fx-border-width: 2.0px; 
+	
+	-fx-alignment: center;
+	-fx-wrap-text: true;
+	-fx-font-family: sans-serif;
+	-fx-font-size: 16.0px;
+	-fx-font-weight: bold;
+	-fx-text-fill: white;
+}
+
+.gridPanePreferences {
+	-fx-vgap: 5px;
 }
 	
