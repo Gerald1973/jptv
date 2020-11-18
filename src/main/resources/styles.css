@@ -81,4 +81,26 @@
 #videoPane {
 	 -fx-background-color: black;
 }
+
+#panePreferences {
+	-fx-padding: 20.0px 20.0px 20.0px 20.0px;
+	-fx-border-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-background-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-border-style: solid ;
+	-fx-border-color: lightgray;
+	-fx-background-color: darkgray;
+	-fx-border-width: 2.0px; 
+}
+
+.buttonPreferences {
+	-fx-padding: 20.0px 20.0px 20.0px 20.0px;
+	-fx-border-radius: 5.0px 5.0px 5.0px 5.0px;
+	-fx-background-color: darkgray;
+	-fx-alignment: center;
+	-fx-wrap-text: true;
+	-fx-font-family: sans-serif;
+	-fx-font-size: 16.0px;
+	-fx-font-weight: bold;
+	-fx-text-fill: white;
+}
 	
