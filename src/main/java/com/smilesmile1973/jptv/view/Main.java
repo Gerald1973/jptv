@@ -35,6 +35,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -183,8 +184,20 @@ public class Main extends Application {
 		Node right = buildRightSplit();
 		SplitPane splitPane = new SplitPane(left, right);
 		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
+		splitPane.setOnMouseMoved(eventMouse -> hideOrShowChannelList(splitPane, eventMouse));
 		root.setCenter(splitPane);
 		return root;
+	}
+
+	private void hideOrShowChannelList(SplitPane splitPane, MouseEvent eventMouse) {
+		double x = eventMouse.getSceneX();
+		double y = eventMouse.getSceneY();
+		double sceneWidth = splitPane.getWidth();
+		if (x < Constants.CHANNEL_LIST_WIDTH) {
+			splitPane.getDividers().get(0).setPosition(Constants.CHANNEL_LIST_WIDTH/sceneWidth);
+		} else {
+			splitPane.getDividers().get(0).setPosition(0);
+		}
 	}
 
 	private Node buildTopPane(Window owner) {
