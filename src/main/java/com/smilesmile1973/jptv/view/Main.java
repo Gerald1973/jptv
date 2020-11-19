@@ -184,6 +184,9 @@ public class Main extends Application {
 		SplitPane splitPane = new SplitPane(left, right);
 		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
 		root.setCenter(splitPane);
+		splitPane.setOnMouseMoved(eventMouse -> {
+			LOG.debug("Mouse x = {}, Mouse y = {}",eventMouse.getSceneX(), eventMouse.getSceneY());
+		});
 		return root;
 	}
 
