@@ -41,6 +41,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.TilePane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import uk.co.caprica.vlcj.binding.LibVlc;
@@ -279,6 +280,7 @@ public class Main extends Application {
 		initChannels(stage);
 		Scene scene = new Scene(buildRoot(stage), Constants.STAGE_WIDTH, Constants.STAGE_HEIGHT);
 		scene.getStylesheets().add(getClass().getClassLoader().getResource("styles.css").toExternalForm());
+		scene.setFill(Color.TRANSPARENT);
 		stage.setTitle("JPTV");
 		stage.setScene(scene);
 		stage.show();

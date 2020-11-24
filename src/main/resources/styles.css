@@ -2,6 +2,7 @@
  	-fx-padding: 2.0px;
  }
  
+ /* TitledPane */
  .titled-pane 
 {
 	-fx-border-radius: 0;
@@ -27,6 +28,11 @@
 .titled-pane:expanded > .title{
 	-fx-border-radius: 5.0px 5.0px 0px 0px;
 	-fx-background-radius: 5.0px 5.0px 0px 0px;
+}
+
+.titled-pane > *.content {
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
 }
  
 .channelView {
