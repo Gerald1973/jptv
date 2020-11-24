@@ -19,11 +19,10 @@ import com.smilesmile1973.jptv.event.RendererCreatedEvent;
 import com.smilesmile1973.jptv.pojo.Channel;
 import com.smilesmile1973.jptv.service.M3UService;
 import com.smilesmile1973.jptv.service.PreferencesService;
+import com.smilesmile1973.jptv.view.fxservice.InfoStreamService;
 import com.sun.jna.ptr.IntByReference;
 
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -121,6 +120,7 @@ public class Main extends Application {
 		});
 
 		videoPane.getChildren().add(videoImageView);
+		videoPane.setOnMouseMoved(eventMouse -> hideOrShowInfo(videoPane, eventMouse));
 		return videoPane;
 	}
 
@@ -138,29 +138,26 @@ public class Main extends Application {
 			accordion.getPanes().add(titledPane);
 			titledPane.setExpanded(false);
 		}
-		accordion.expandedPaneProperty().addListener(new ChangeListener<TitledPane>() {
-
-			@Override
-			public void changed(ObservableValue<? extends TitledPane> observable, TitledPane oldValue,
-					TitledPane titledPane) {
-
-				if (titledPane != null) {
-					titledPane.setContent(null);
-					TilePane pane = new TilePane();
-					pane.getStyleClass().add("tilePaneChannelView");
-					List<Channel> channels = M3UService.getInstance().sortGroup(titledPane.getText());
-					for (int i = 0; i < channels.size(); i++) {
-						ChannelView channelView = new ChannelView(channels.get(i));
-						pane.getChildren().add(channelView);
-					}
-					titledPane.setContent(pane);
-				}
-			}
-		});
+		accordion.expandedPaneProperty()
+				.addListener((observable, oldValue, titledPane) -> expandTitledPane(titledPane));
 		scrollPane.setMinWidth(0);
 		scrollPane.setMaxWidth(Constants.CHANNEL_LIST_WIDTH);
 		return scrollPane;
 
+	}
+
+	private void expandTitledPane(TitledPane titledPane) {
+		if (titledPane != null) {
+			titledPane.setContent(null);
+			TilePane pane = new TilePane();
+			pane.getStyleClass().add("tilePaneChannelView");
+			List<Channel> channels = M3UService.getInstance().sortGroup(titledPane.getText());
+			for (int i = 0; i < channels.size(); i++) {
+				ChannelView channelView = new ChannelView(channels.get(i));
+				pane.getChildren().add(channelView);
+			}
+			titledPane.setContent(pane);
+		}
 	}
 
 	private Node buildMenu(Window owner) {
@@ -173,8 +170,6 @@ public class Main extends Application {
 		return menuBar;
 	}
 
-	
-	
 	private BorderPane root;
 
 	private Parent buildRoot(Window owner) {
@@ -192,12 +187,22 @@ public class Main extends Application {
 
 	private void hideOrShowChannelList(SplitPane splitPane, MouseEvent eventMouse) {
 		double x = eventMouse.getSceneX();
-		double y = eventMouse.getSceneY();
 		double sceneWidth = splitPane.getWidth();
 		if (x < Constants.CHANNEL_LIST_WIDTH) {
-			splitPane.getDividers().get(0).setPosition(Constants.CHANNEL_LIST_WIDTH/sceneWidth);
+			splitPane.getDividers().get(0).setPosition(Constants.CHANNEL_LIST_WIDTH / sceneWidth);
 		} else {
 			splitPane.getDividers().get(0).setPosition(0);
+		}
+	}
+
+	private void hideOrShowInfo(Pane splitPane, MouseEvent eventMouse) {
+		double x = eventMouse.getX();
+		double y = eventMouse.getY();
+		if (x > splitPane.getWidth() - Constants.INFO_ZONE_WIDTH && y < Constants.INFO_ZONE_HEIGHT) {
+			LOG.debug("Display info x={} y={}", x, y);
+			InfoStreamService.getInstance().getInfo(embeddedMediaPlayer);
+		} else {
+			LOG.debug("Hide info x={} y={}", x, y);
 		}
 	}
 

@@ -7,6 +7,14 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>com.zenjava</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>8.8.3</version>
+        <configuration>
+          <mainClass>&gt;com.smilesmile1973.jptv.Main</mainClass>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-resources-plugin</artifactId>
         <version>3.2.0</version>
         <executions>
