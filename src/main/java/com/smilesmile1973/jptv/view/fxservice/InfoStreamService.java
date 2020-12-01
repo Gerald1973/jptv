@@ -5,14 +5,18 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.concurrent.Service;
+import com.smilesmile1973.jptv.Utils;
+import com.smilesmile1973.jptv.event.EventMediaStatistics;
+
+import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
+import javafx.util.Duration;
 import uk.co.caprica.vlcj.media.AudioTrackInfo;
 import uk.co.caprica.vlcj.media.InfoApi;
 import uk.co.caprica.vlcj.media.MediaStatistics;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 
-public class InfoStreamService extends Service<MediaPlayer>{
+public class InfoStreamService extends ScheduledService<MediaPlayer>{
 	
 	private static final Logger LOG = LoggerFactory.getLogger(InfoStreamService.class);
 	
@@ -34,6 +38,7 @@ public class InfoStreamService extends Service<MediaPlayer>{
 		LOG.debug("State: {}", this.getState());
 		if (this.getState() == State.READY) {
 			this.start();
+			this.setPeriod(Duration.millis(500));
 		}
 	}
 
@@ -42,7 +47,7 @@ public class InfoStreamService extends Service<MediaPlayer>{
 		return new Task<MediaPlayer>() {
 			@Override
 			protected MediaPlayer call() throws Exception {
-				mediaPlayer.media().parsing().parse();
+				//mediaPlayer.media().parsing().parse();
 				return mediaPlayer;
 			}
 		};
@@ -50,35 +55,17 @@ public class InfoStreamService extends Service<MediaPlayer>{
 
 	@Override
 	protected void succeeded() {
-		LOG.debug("succeeded");
+		//LOG.debug("succeeded");
 		InfoApi infoApi = mediaPlayer.media().info();
 		MediaStatistics mediaStatics = infoApi.statistics();
 		List<AudioTrackInfo> audioTracks = infoApi.audioTracks();
 		for (AudioTrackInfo audioTrackInfo : audioTracks) {
 			LOG.debug("Audio track info bit rate: {}", audioTrackInfo.bitRate());
 		}
-		LOG.debug("Duration           : {}", infoApi.duration());
-		LOG.debug("MRL                : {}", infoApi.mrl());
-		
-		
-		
-		LOG.debug("audioBuffersLost   : {}", mediaStatics.audioBuffersLost());
-		LOG.debug("audioBuffersPlayed : {}", mediaStatics.audioBuffersPlayed());
-		LOG.debug("decodedAudio       : {}", mediaStatics.decodedAudio());
-		LOG.debug("decodedVideo       : {}", mediaStatics.decodedVideo());
-		LOG.debug("demuxBytesRead     : {}", mediaStatics.demuxBytesRead());
-		LOG.debug("demuxCorrupted     : {}", mediaStatics.demuxCorrupted());
-		LOG.debug("demuxDiscontinuity : {}", mediaStatics.demuxDiscontinuity());
-		LOG.debug("inputBitrate       : {}", mediaStatics.inputBitrate());
-		LOG.debug("inputBytesRead     : {}", mediaStatics.inputBytesRead());
-		LOG.debug("picturesDisplayed  : {}", mediaStatics.picturesDisplayed());
-		LOG.debug("picturesLost       : {}", mediaStatics.picturesLost());
-		LOG.debug("sendBitrate        : {}", mediaStatics.sendBitrate());
-		LOG.debug("sentBytes          : {}", mediaStatics.sentBytes());
-		LOG.debug("sentPackets        : {}", mediaStatics.sentPackets());
-		
-		
-		
+		//LOG.debug("Duration           : {}", infoApi.duration());
+		//LOG.debug("MRL                : {}", infoApi.mrl());
+		EventMediaStatistics eventMediaStatistics = new EventMediaStatistics(mediaStatics);
+		Utils.getEventBus().post(eventMediaStatistics);
 		this.reset();
 	}
 

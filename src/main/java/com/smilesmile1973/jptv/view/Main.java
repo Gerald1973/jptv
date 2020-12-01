@@ -69,6 +69,8 @@ public class Main extends Application {
 	private boolean keepRatio = true;
 
 	private ImageView videoImageView = new ImageView();
+	
+	private InfoView infoView = new InfoView();
 
 	public Main() {
 		this.mediaPlayerFactory = new MediaPlayerFactory();
@@ -120,6 +122,8 @@ public class Main extends Application {
 		});
 
 		videoPane.getChildren().add(videoImageView);
+		videoPane.getChildren().add(infoView);
+		
 		videoPane.setOnMouseMoved(eventMouse -> hideOrShowInfo(videoPane, eventMouse));
 		return videoPane;
 	}
@@ -195,14 +199,13 @@ public class Main extends Application {
 		}
 	}
 
-	private void hideOrShowInfo(Pane splitPane, MouseEvent eventMouse) {
+	private void hideOrShowInfo(Pane pane, MouseEvent eventMouse) {
 		double x = eventMouse.getX();
 		double y = eventMouse.getY();
-		if (x > splitPane.getWidth() - Constants.INFO_ZONE_WIDTH && y < Constants.INFO_ZONE_HEIGHT) {
-			LOG.debug("Display info x={} y={}", x, y);
-			InfoStreamService.getInstance().getInfo(embeddedMediaPlayer);
+		if (x > pane.getWidth() - Constants.INFO_ZONE_WIDTH && y < Constants.INFO_ZONE_HEIGHT) {
+			this.infoView.setVisible(true);
 		} else {
-			LOG.debug("Hide info x={} y={}", x, y);
+			this.infoView.setVisible(false);
 		}
 	}
 
@@ -221,6 +224,7 @@ public class Main extends Application {
 	@Subscribe
 	public void rendererCreated(RendererCreatedEvent event) {
 		placeVideoImage(videoImageView, true);
+		InfoStreamService.getInstance().getInfo(embeddedMediaPlayer);
 	}
 
 	@Subscribe

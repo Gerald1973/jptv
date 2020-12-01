@@ -38,7 +38,7 @@ public class M3UService {
 	}
 
 	public List<String> fetchWebSite(String url) throws Exception {
-		List<String> results = new ArrayList<String>();
+		List<String> results = new ArrayList<>();
 		URL resource = new URL(url);
 		InputStream in = resource.openStream();
 		BufferedInputStream buffer = new BufferedInputStream(in);
