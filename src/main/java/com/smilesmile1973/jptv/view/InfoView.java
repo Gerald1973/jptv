@@ -20,8 +20,6 @@ public class InfoView extends Pane {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InfoView.class);
 
-	private MediaStatistics mediaStatics;
-
 	Text txtAudioBuffersLost = new Text();
 	Text txtAudioBuffersPlayed = new Text();
 	Text txtDecodedAudio = new Text();
@@ -41,24 +39,49 @@ public class InfoView extends Pane {
 		this.init();
 	}
 
+	private void addLabelAndTxt(GridPane gridPane, int row, String labelText, Text text) {
+		Label lbl = new Label(labelText);
+		gridPane.add(lbl, 0, row);
+		gridPane.add(text, 1, row);
+	}
+
 	@Subscribe
 	public void eventMediaStaticsFetched(EventMediaStatistics event) {
-		this.mediaStatics = event.getMediaStatistics();
-		this.txtPicturesDisplayed.setText(String.valueOf(this.mediaStatics.picturesDisplayed()));
-		this.txtInputBitrate.setText(String.valueOf(this.mediaStatics.inputBitrate()));
+		MediaStatistics mediaStatistics = event.getMediaStatistics();
+		txtAudioBuffersLost.setText(String.valueOf(mediaStatistics.audioBuffersLost()));
+		txtAudioBuffersPlayed.setText(String.valueOf(mediaStatistics.audioBuffersPlayed()));
+		txtDecodedAudio.setText(String.valueOf(mediaStatistics.decodedAudio()));
+		txtDecodedVideo.setText(String.valueOf(mediaStatistics.decodedVideo()));
+		txtDemuxBytesRead.setText(String.valueOf(mediaStatistics.demuxBitrate()));
+		txtDemuxCorrupted.setText(String.valueOf(mediaStatistics.demuxCorrupted()));
+		txtDemuxDiscontinuity.setText(String.valueOf(mediaStatistics.demuxDiscontinuity()));
+		txtInputBitrate.setText(String.valueOf(mediaStatistics.inputBitrate()));
+		txtInputBytesRead.setText(String.valueOf(mediaStatistics.inputBytesRead()));
+		txtPicturesLost.setText(String.valueOf(mediaStatistics.picturesLost()));
+		txtSendBitrate.setText(String.valueOf(mediaStatistics.sendBitrate()));
+		txtSentBytes.setText(String.valueOf(mediaStatistics.sentBytes()));
+		txtSentPackets.setText(String.valueOf(mediaStatistics.sentPackets()));
+		txtPicturesDisplayed.setText(String.valueOf(mediaStatistics.picturesDisplayed()));
 	}
 
 	private void init() {
 		Utils.getEventBus().register(this);
 		GridPane gridPane = new GridPane();
-		Label lblBitRate = new Label("Bit rate");
-		gridPane.add(lblBitRate, 0, 0);
-		gridPane.add(txtInputBitrate, 1, 0);
-
-		Label lblPicturesDisplayed = new Label("Pictures displayed");
-		gridPane.add(lblPicturesDisplayed, 0, 1);
-		gridPane.add(txtPicturesDisplayed, 1, 1);
-
+		int c = 0;
+		addLabelAndTxt(gridPane, c++, "Audio buffers lost", this.txtAudioBuffersLost);
+		addLabelAndTxt(gridPane, c++, "Audio buffers played", this.txtAudioBuffersPlayed);
+		addLabelAndTxt(gridPane, c++, "Decoded audio", this.txtDecodedAudio);
+		addLabelAndTxt(gridPane, c++, "Decoded video", this.txtDecodedVideo);
+		addLabelAndTxt(gridPane, c++, "Demux bytes read", this.txtDemuxBytesRead);
+		addLabelAndTxt(gridPane, c++, "Demux bytes corrupted", this.txtDemuxCorrupted);
+		addLabelAndTxt(gridPane, c++, "Demux discontinuity", this.txtDemuxDiscontinuity);
+		addLabelAndTxt(gridPane, c++, "Input bit rate", this.txtInputBitrate);
+		addLabelAndTxt(gridPane, c++, "Input bytes read", this.txtInputBytesRead);
+		addLabelAndTxt(gridPane, c++, "Pictures lost", txtPicturesLost);
+		addLabelAndTxt(gridPane, c++, "Send bit rate", txtSendBitrate);
+		addLabelAndTxt(gridPane, c++, "Send bytes", txtSentBytes);
+		addLabelAndTxt(gridPane, c++, "Send packets", txtSentPackets);
+		addLabelAndTxt(gridPane, c++, "Pictures displayed", txtPicturesDisplayed);
 		BackgroundFill bf = new BackgroundFill(Color.RED, null, null);
 		Background bg = new Background(bf);
 		this.setBackground(bg);

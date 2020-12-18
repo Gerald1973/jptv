@@ -23,9 +23,15 @@ public class InfoStreamService extends ScheduledService<Void> {
 
 	private static InfoStreamService instance;
 
-	public static InfoStreamService getInstance() {
+	public static InfoStreamService getInstance(MediaPlayer mediaPlayer) {
 		if (instance == null) {
 			instance = new InfoStreamService();
+			Duration duration = new Duration(Constants.REFRESH_INFO_INTERVAL_MS);
+			instance.setDelay(duration);
+			instance.mediaPlayer = mediaPlayer;
+			instance.setPeriod(duration);
+			instance.start();
+			// instance.getInfo(mediaPlayer);
 		}
 		return instance;
 	}
@@ -54,32 +60,30 @@ public class InfoStreamService extends ScheduledService<Void> {
 				for (AudioTrackInfo audioTrackInfo : audioTracks) {
 					LOG.debug("Audio track info bit rate: {}", audioTrackInfo.bitRate());
 				}
-				// LOG.debug("Duration : {}", infoApi.duration());
-				// LOG.debug("MRL : {}", infoApi.mrl());
 				eventMediaStatistics = new EventMediaStatistics(mediaStatics);
+				Utils.getEventBus().post(eventMediaStatistics);
 				return null;
 			}
 		};
 	}
+//
+//	@Override
+//	protected void failed() {
+//		LOG.debug("failed");
+//		this.reset();
+//	}
 
-	@Override
-	protected void failed() {
-		LOG.debug("failed");
-		this.reset();
-	}
+//	public void getInfo(MediaPlayer mediaPlayer) {
+//		this.mediaPlayer = mediaPlayer;
+//		LOG.debug("State: {}", this.getState());
+//		if (this.getState() == State.READY) {
+//			this.start();
+//		}
+//	}
 
-	public void getInfo(MediaPlayer mediaPlayer) {
-		this.mediaPlayer = mediaPlayer;
-		LOG.debug("State: {}", this.getState());
-		if (this.getState() == State.READY) {
-			this.start();
-			this.setPeriod(Duration.millis(Constants.REFRESH_INFO_INTERVAL_MS));
-		}
-	}
-
-	@Override
-	protected void succeeded() {
-		Utils.getEventBus().post(eventMediaStatistics);
-		this.reset();
-	}
+//	@Override
+//	protected void succeeded() {
+//		Utils.getEventBus().post(eventMediaStatistics);
+//		this.reset();
+//	}
 }

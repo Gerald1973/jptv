@@ -19,6 +19,16 @@
 
 package com.smilesmile1973.jptv.view;
 
+import static uk.co.caprica.vlcj.player.embedded.videosurface.VideoSurfaceAdapters.getVideoSurfaceAdapter;
+
+import java.nio.ByteBuffer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.smilesmile1973.jptv.Utils;
+import com.smilesmile1973.jptv.event.RendererCreatedEvent;
+
 import javafx.application.Platform;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelBuffer;
@@ -32,82 +42,84 @@ import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCall
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback;
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat;
 
-import java.nio.ByteBuffer;
-
-import com.smilesmile1973.jptv.Utils;
-import com.smilesmile1973.jptv.event.RendererCreatedEvent;
-
-import static uk.co.caprica.vlcj.player.embedded.videosurface.VideoSurfaceAdapters.getVideoSurfaceAdapter;
-
 /**
- * Factory used to create a vlcj {@link VideoSurface} component for a JavaFX {@link ImageView}.
+ * Factory used to create a vlcj {@link VideoSurface} component for a JavaFX
+ * {@link ImageView}.
  * <p>
  * Developer note: the imageView reference will keep this factory object alive.
  */
 public final class ImageViewVideoSurfaceFactory {
 
-    private final ImageView imageView;
-    private final PixelBufferBufferFormatCallback bufferFormatCallback;
-    private final PixelBufferRenderCallback renderCallback;
-    private final PixelBufferVideoSurface videoSurface;
+	private class PixelBufferBufferFormatCallback implements BufferFormatCallback {
 
-    private PixelBuffer<ByteBuffer> pixelBuffer;
+		private int sourceWidth;
+		private int sourceHeight;
 
-    /**
-     * Get a new {@link VideoSurface} for an {@link ImageView}.
-     *
-     * @param imageView image view used to render the video
-     * @return video surface
-     */
-    public static VideoSurface videoSurfaceForImageView(ImageView imageView) {
-        return new ImageViewVideoSurfaceFactory(imageView).videoSurface;
-    }
+		@Override
+		public void allocatedBuffers(ByteBuffer[] buffers) {
+			LOG.debug("allocatedBuffers");
+			PixelFormat<ByteBuffer> pixelFormat = PixelFormat.getByteBgraPreInstance();
+			pixelBuffer = new PixelBuffer<>(sourceWidth, sourceHeight, buffers[0], pixelFormat);
+			imageView.setImage(new WritableImage(pixelBuffer));
+		}
 
-    private ImageViewVideoSurfaceFactory(ImageView imageView) {
-        this.imageView = imageView;
-        this.bufferFormatCallback = new PixelBufferBufferFormatCallback();
-        this.renderCallback = new PixelBufferRenderCallback();
-        this.videoSurface = new PixelBufferVideoSurface();
-    }
+		@Override
+		public BufferFormat getBufferFormat(int sourceWidth, int sourceHeight) {
+			LOG.debug("getBufferFormat");
+			this.sourceWidth = sourceWidth;
+			this.sourceHeight = sourceHeight;
+			return new RV32BufferFormat(sourceWidth, sourceHeight);
+		}
+	}
 
-    private class PixelBufferBufferFormatCallback implements BufferFormatCallback {
+	private class PixelBufferRenderCallback implements RenderCallback {
+		@Override
+		public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
+			Platform.runLater(() -> pixelBuffer.updateBuffer(pb -> {
+				if (!displayed) {
+					displayed = true;
+					Utils.getEventBus().post(new RendererCreatedEvent(true));
+				}
+				return null;
+			}));
+		}
+	}
 
-        private int sourceWidth;
-        private int sourceHeight;
+	private class PixelBufferVideoSurface extends CallbackVideoSurface {
+		private PixelBufferVideoSurface() {
+			super(ImageViewVideoSurfaceFactory.this.bufferFormatCallback,
+					ImageViewVideoSurfaceFactory.this.renderCallback, true, getVideoSurfaceAdapter());
+		}
+	}
 
-        @Override
-        public BufferFormat getBufferFormat(int sourceWidth, int sourceHeight) {
-            this.sourceWidth = sourceWidth;
-            this.sourceHeight = sourceHeight;
-            return new RV32BufferFormat(sourceWidth, sourceHeight);
-        }
+	private static final Logger LOG = LoggerFactory.getLogger(ImageViewVideoSurfaceFactory.class);
 
-        @Override
-        public void allocatedBuffers(ByteBuffer[] buffers) {
-            PixelFormat<ByteBuffer> pixelFormat = PixelFormat.getByteBgraPreInstance();
-            pixelBuffer = new PixelBuffer<>(sourceWidth, sourceHeight, buffers[0], pixelFormat);
-            imageView.setImage(new WritableImage(pixelBuffer));
-        }
-    }
+	/**
+	 * Get a new {@link VideoSurface} for an {@link ImageView}.
+	 *
+	 * @param imageView image view used to render the video
+	 * @return video surface
+	 */
+	public static VideoSurface videoSurfaceForImageView(ImageView imageView) {
+		return new ImageViewVideoSurfaceFactory(imageView).videoSurface;
+	}
 
-    private class PixelBufferRenderCallback implements RenderCallback {
-        @Override
-        public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
-            Platform.runLater(() -> pixelBuffer.updateBuffer(pb -> {
-            	Utils.getEventBus().post(new RendererCreatedEvent(true));
-            	return null;
-            }));
-        }
-    }
+	private final ImageView imageView;
 
-    private class PixelBufferVideoSurface extends CallbackVideoSurface {
-        private PixelBufferVideoSurface() {
-            super(
-                ImageViewVideoSurfaceFactory.this.bufferFormatCallback,
-                ImageViewVideoSurfaceFactory.this.renderCallback,
-                true,
-                getVideoSurfaceAdapter()
-            );
-        }
-    }
+	private final PixelBufferBufferFormatCallback bufferFormatCallback;
+
+	private final PixelBufferRenderCallback renderCallback;
+
+	private final PixelBufferVideoSurface videoSurface;
+
+	private PixelBuffer<ByteBuffer> pixelBuffer;
+
+	private boolean displayed = false;
+
+	private ImageViewVideoSurfaceFactory(ImageView imageView) {
+		this.imageView = imageView;
+		this.bufferFormatCallback = new PixelBufferBufferFormatCallback();
+		this.renderCallback = new PixelBufferRenderCallback();
+		this.videoSurface = new PixelBufferVideoSurface();
+	}
 }

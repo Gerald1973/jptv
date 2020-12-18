@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.smilesmile1973.jptv.view;
 
@@ -69,8 +69,10 @@ public class Main extends Application {
 	private boolean keepRatio = true;
 
 	private ImageView videoImageView = new ImageView();
-	
+
 	private InfoView infoView = new InfoView();
+
+	private BorderPane root;
 
 	public Main() {
 		this.mediaPlayerFactory = new MediaPlayerFactory();
@@ -98,6 +100,38 @@ public class Main extends Application {
 		});
 	}
 
+	private Node buildLeftSplit() {
+		Accordion accordion = new Accordion();
+		Set<String> keys = M3UService.getInstance().getChannels().keySet();
+		ScrollPane scrollPane = new ScrollPane();
+		scrollPane.setId("scrollPaneAccordion");
+		scrollPane.setContent(accordion);
+		for (String key : keys) {
+			TitledPane titledPane = new TitledPane();
+			titledPane.setText(key);
+			titledPane.setMaxWidth(Constants.CHANNEL_LIST_WIDTH);
+			titledPane.setPrefWidth(Constants.CHANNEL_LIST_WIDTH);
+			accordion.getPanes().add(titledPane);
+			titledPane.setExpanded(false);
+		}
+		accordion.expandedPaneProperty()
+				.addListener((observable, oldValue, titledPane) -> expandTitledPane(titledPane));
+		scrollPane.setMinWidth(0);
+		scrollPane.setMaxWidth(Constants.CHANNEL_LIST_WIDTH);
+		return scrollPane;
+
+	}
+
+	private Node buildMenu(Window owner) {
+		MenuBar menuBar = new MenuBar();
+		MenuItem configuration = new MenuItem("Configuration");
+		configuration.setOnAction(actionEvent -> new Preferences(owner));
+		Menu preferences = new Menu("Preferences");
+		preferences.getItems().add(configuration);
+		menuBar.getMenus().add(preferences);
+		return menuBar;
+	}
+
 	private Node buildRightSplit() {
 		Pane videoPane = new Pane();
 		videoPane.setId("videoPane");
@@ -123,31 +157,34 @@ public class Main extends Application {
 
 		videoPane.getChildren().add(videoImageView);
 		videoPane.getChildren().add(infoView);
-		
+
 		videoPane.setOnMouseMoved(eventMouse -> hideOrShowInfo(videoPane, eventMouse));
 		return videoPane;
 	}
 
-	private Node buildLeftSplit() {
-		Accordion accordion = new Accordion();
-		Set<String> keys = M3UService.getInstance().getChannels().keySet();
-		ScrollPane scrollPane = new ScrollPane();
-		scrollPane.setId("scrollPaneAccordion");
-		scrollPane.setContent(accordion);
-		for (String key : keys) {
-			TitledPane titledPane = new TitledPane();
-			titledPane.setText(key);
-			titledPane.setMaxWidth(Constants.CHANNEL_LIST_WIDTH);
-			titledPane.setPrefWidth(Constants.CHANNEL_LIST_WIDTH);
-			accordion.getPanes().add(titledPane);
-			titledPane.setExpanded(false);
-		}
-		accordion.expandedPaneProperty()
-				.addListener((observable, oldValue, titledPane) -> expandTitledPane(titledPane));
-		scrollPane.setMinWidth(0);
-		scrollPane.setMaxWidth(Constants.CHANNEL_LIST_WIDTH);
-		return scrollPane;
+	private Parent buildRoot(Window owner) {
+		root = new BorderPane();
+		root.setId("background");
+		root.setTop(buildTopPane(owner));
+		Node left = buildLeftSplit();
+		Node right = buildRightSplit();
+		SplitPane splitPane = new SplitPane(left, right);
+		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
+		splitPane.setOnMouseMoved(eventMouse -> hideOrShowChannelList(splitPane, eventMouse));
+		root.setCenter(splitPane);
+		return root;
+	}
 
+	private Node buildTopPane(Window owner) {
+		HBox hbox = new HBox();
+		hbox.getChildren().add(buildMenu(owner));
+		return hbox;
+	}
+
+	@Subscribe
+	public void changeChannel(EventChannel eventChannel) {
+		LOG.debug("Change channel to {}:", eventChannel.getChannel().getChannelURL());
+		embeddedMediaPlayer.media().play(eventChannel.getChannel().getChannelURL());
 	}
 
 	private void expandTitledPane(TitledPane titledPane) {
@@ -162,31 +199,6 @@ public class Main extends Application {
 			}
 			titledPane.setContent(pane);
 		}
-	}
-
-	private Node buildMenu(Window owner) {
-		MenuBar menuBar = new MenuBar();
-		MenuItem configuration = new MenuItem("Configuration");
-		configuration.setOnAction(actionEvent -> new Preferences(owner));
-		Menu preferences = new Menu("Preferences");
-		preferences.getItems().add(configuration);
-		menuBar.getMenus().add(preferences);
-		return menuBar;
-	}
-
-	private BorderPane root;
-
-	private Parent buildRoot(Window owner) {
-		root = new BorderPane();
-		root.setId("background");
-		root.setTop(buildTopPane(owner));
-		Node left = buildLeftSplit();
-		Node right = buildRightSplit();
-		SplitPane splitPane = new SplitPane(left, right);
-		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
-		splitPane.setOnMouseMoved(eventMouse -> hideOrShowChannelList(splitPane, eventMouse));
-		root.setCenter(splitPane);
-		return root;
 	}
 
 	private void hideOrShowChannelList(SplitPane splitPane, MouseEvent eventMouse) {
@@ -206,35 +218,6 @@ public class Main extends Application {
 			this.infoView.setVisible(true);
 		} else {
 			this.infoView.setVisible(false);
-		}
-	}
-
-	private Node buildTopPane(Window owner) {
-		HBox hbox = new HBox();
-		hbox.getChildren().add(buildMenu(owner));
-		return hbox;
-	}
-
-	@Subscribe
-	public void changeChannel(EventChannel eventChannel) {
-		LOG.debug("Change channel to {}:", eventChannel.getChannel().getChannelURL());
-		embeddedMediaPlayer.media().play(eventChannel.getChannel().getChannelURL());
-	}
-
-	@Subscribe
-	public void rendererCreated(RendererCreatedEvent event) {
-		placeVideoImage(videoImageView, true);
-		InfoStreamService.getInstance().getInfo(embeddedMediaPlayer);
-	}
-
-	@Subscribe
-	public void refreshCenter(ChannelListCreatedEvent event) {
-		if (event.isCreated()) {
-			Node left = buildLeftSplit();
-			Node right = buildRightSplit();
-			SplitPane splitPane = new SplitPane(left, right);
-			splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
-			root.setCenter(splitPane);
 		}
 	}
 
@@ -284,6 +267,23 @@ public class Main extends Application {
 		}
 	}
 
+	@Subscribe
+	public void refreshCenter(ChannelListCreatedEvent event) {
+		if (event.isCreated()) {
+			Node left = buildLeftSplit();
+			Node right = buildRightSplit();
+			SplitPane splitPane = new SplitPane(left, right);
+			splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
+			root.setCenter(splitPane);
+		}
+	}
+
+	@Subscribe
+	public void rendererCreated(RendererCreatedEvent event) {
+		placeVideoImage(videoImageView, true);
+		InfoStreamService.getInstance(embeddedMediaPlayer);
+	}
+
 	@Override
 	public void start(Stage stage) throws Exception {
 		initChannels(stage);
@@ -301,6 +301,10 @@ public class Main extends Application {
 				playing = embeddedMediaPlayer.media()
 						.play(PreferencesService.getInstance().readProperty(PreferencesService.KEY_IPTV_M3U));
 			}
+		}
+		if (playing) {
+			placeVideoImage(this.videoImageView, true);
+			InfoStreamService.getInstance(embeddedMediaPlayer);
 		}
 		LOG.debug("Playing ok ? {}", playing);
 	}
