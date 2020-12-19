@@ -31,14 +31,12 @@ public class ChannelView extends GridPane {
 
 	public ChannelView(Channel channel) {
 		getStyleClass().add("channelView");
-		LOG.debug(channel.getTvLogo());
 		this.channel = channel;
 		// Logo
 		StackPane pane = new StackPane();
 		pane.setPrefSize(LOGO_PANE_WIDTH, LOGO_PANE_HEIGHT);
 		pane.setMaxSize(LOGO_PANE_WIDTH, LOGO_PANE_HEIGHT);
 		ImageView imageView = new ImageView();
-		this.loadImage(channel, imageView);
 		pane.getChildren().add(imageView);
 		// Channel name
 		Label label = new Label(buildTextLabel());
@@ -46,7 +44,7 @@ public class ChannelView extends GridPane {
 		label.setPrefWidth(LABEL_MAX_WIDTH);
 		label.setMaxWidth(LABEL_MAX_WIDTH);
 		label.setMinWidth(LABEL_MAX_WIDTH);
-		label.setWrapText(true);
+		label.setWrapText(false);
 		label.setOnMouseClicked(event -> {
 			ChannelView channelView = ((ChannelView) ((Node) event.getSource()).getParent());
 			LOG.debug("Change to channel {}", channelView.getChannel().getChannelURL());
