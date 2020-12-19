@@ -31,7 +31,6 @@ public class InfoStreamService extends ScheduledService<Void> {
 			instance.mediaPlayer = mediaPlayer;
 			instance.setPeriod(duration);
 			instance.start();
-			// instance.getInfo(mediaPlayer);
 		}
 		return instance;
 	}
@@ -58,7 +57,12 @@ public class InfoStreamService extends ScheduledService<Void> {
 				MediaStatistics mediaStatics = infoApi.statistics();
 				List<AudioTrackInfo> audioTracks = infoApi.audioTracks();
 				for (AudioTrackInfo audioTrackInfo : audioTracks) {
-					LOG.debug("Audio track info bit rate: {}", audioTrackInfo.bitRate());
+					LOG.debug("Audio track info bit rate         : {}", audioTrackInfo.bitRate());
+					LOG.debug("Audio track info codec            : {}", audioTrackInfo.codecDescription());
+					LOG.debug("Audio track info codec            : {}", audioTrackInfo.codecName());
+					LOG.debug("Audio track info codec description: {}", audioTrackInfo.description());
+					LOG.debug("Audio track info language         : {}", audioTrackInfo.language());
+
 				}
 				eventMediaStatistics = new EventMediaStatistics(mediaStatics);
 				Utils.getEventBus().post(eventMediaStatistics);
@@ -66,24 +70,20 @@ public class InfoStreamService extends ScheduledService<Void> {
 			}
 		};
 	}
-//
-//	@Override
-//	protected void failed() {
-//		LOG.debug("failed");
-//		this.reset();
-//	}
 
-//	public void getInfo(MediaPlayer mediaPlayer) {
-//		this.mediaPlayer = mediaPlayer;
-//		LOG.debug("State: {}", this.getState());
-//		if (this.getState() == State.READY) {
-//			this.start();
-//		}
-//	}
+	@Override
+	protected void failed() {
+		super.failed();
+	}
 
-//	@Override
-//	protected void succeeded() {
-//		Utils.getEventBus().post(eventMediaStatistics);
-//		this.reset();
-//	}
+	@Override
+	public void reset() {
+		super.reset();
+	}
+
+	@Override
+	protected void succeeded() {
+		super.succeeded();
+	}
+
 }

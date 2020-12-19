@@ -118,4 +118,15 @@
 .gridPanePreferences {
 	-fx-vgap: 5px;
 }
+
+.infoViewText {
+	-fx-alignment: center-left;
+	-fx-wrap-text: true;
+	-fx-font-family: sans-serif;
+	-fx-font-size: 16.0px;
+	-fx-font-weight: bold;
+	-fx-fill: white;
+	-fx-stroke-width: 1;
+	-fx-stroke: black;
+}
 	

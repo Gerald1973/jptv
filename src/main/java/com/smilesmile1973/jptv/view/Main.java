@@ -3,6 +3,7 @@
  */
 package com.smilesmile1973.jptv.view;
 
+import java.awt.Dimension;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +21,6 @@ import com.smilesmile1973.jptv.pojo.Channel;
 import com.smilesmile1973.jptv.service.M3UService;
 import com.smilesmile1973.jptv.service.PreferencesService;
 import com.smilesmile1973.jptv.view.fxservice.InfoStreamService;
-import com.sun.jna.ptr.IntByReference;
 
 import javafx.application.Application;
 import javafx.scene.Node;
@@ -43,8 +43,8 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import uk.co.caprica.vlcj.binding.LibVlc;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
+import uk.co.caprica.vlcj.media.MediaRef;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
@@ -62,42 +62,38 @@ public class Main extends Application {
 		launch(args);
 	}
 
-	private final MediaPlayerFactory mediaPlayerFactory;
+	private boolean positionChanged = false;
+
+	private boolean videoOutput = false;
+
+	private final MediaPlayerFactory mediaPlayerFactory = new MediaPlayerFactory();
 
 	private EmbeddedMediaPlayer embeddedMediaPlayer;
 
 	private boolean keepRatio = true;
 
-	private ImageView videoImageView = new ImageView();
+	private final ImageView videoImageView = new ImageView();
 
-	private InfoView infoView = new InfoView();
+	private final InfoView infoView = new InfoView();
 
 	private BorderPane root;
 
+	private boolean fired = false;
+
 	public Main() {
-		this.mediaPlayerFactory = new MediaPlayerFactory();
-		this.embeddedMediaPlayer = mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
-		this.embeddedMediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
-			@Override
-			public void paused(MediaPlayer mediaPlayer) {
-				// LOG.debug("Media player paused");
-			}
+	}
 
-			@Override
-			public void playing(MediaPlayer mediaPlayer) {
-				LOG.debug("Media player playing");
-			}
-
-			@Override
-			public void stopped(MediaPlayer mediaPlayer) {
-				// LOG.debug("Media player stopped");
-			}
-
-			@Override
-			public void timeChanged(MediaPlayer mediaPlayer, long newTime) {
-				// LOG.debug("Media player time changed");
-			}
-		});
+	@Subscribe
+	public void buildCenter(ChannelListCreatedEvent event) {
+		if (event.isCreated()) {
+			Node left = buildLeftSplit();
+			Node right = buildRightSplit();
+			SplitPane splitPane = new SplitPane(left, right);
+			splitPane.setDividerPosition(0, 0);
+			root.setCenter(splitPane);
+			embeddedMediaPlayer.media().play(M3UService.getInstance().getFirst().getChannelURL());
+			splitPane.setOnMouseMoved(eventMouse -> hideOrShowChannelList(splitPane, eventMouse));
+		}
 	}
 
 	private Node buildLeftSplit() {
@@ -114,8 +110,7 @@ public class Main extends Application {
 			accordion.getPanes().add(titledPane);
 			titledPane.setExpanded(false);
 		}
-		accordion.expandedPaneProperty()
-				.addListener((observable, oldValue, titledPane) -> expandTitledPane(titledPane));
+		accordion.expandedPaneProperty().addListener((observable, oldValue, titledPane) -> expandTitledPane(titledPane));
 		scrollPane.setMinWidth(0);
 		scrollPane.setMaxWidth(Constants.CHANNEL_LIST_WIDTH);
 		return scrollPane;
@@ -136,7 +131,6 @@ public class Main extends Application {
 		Pane videoPane = new Pane();
 		videoPane.setId("videoPane");
 		embeddedMediaPlayer.videoSurface().set(ImageViewVideoSurfaceFactory.videoSurfaceForImageView(videoImageView));
-
 		videoPane.widthProperty().addListener((observableValue, oldValue, newValue) -> {
 			if (keepRatio) {
 				placeVideoImage(videoImageView, keepRatio);
@@ -157,6 +151,8 @@ public class Main extends Application {
 
 		videoPane.getChildren().add(videoImageView);
 		videoPane.getChildren().add(infoView);
+		infoView.setLayoutX(videoPane.getWidth() - Constants.INFO_VIEW_WIDTH);
+		infoView.setVisible(false);
 
 		videoPane.setOnMouseMoved(eventMouse -> hideOrShowInfo(videoPane, eventMouse));
 		return videoPane;
@@ -166,12 +162,12 @@ public class Main extends Application {
 		root = new BorderPane();
 		root.setId("background");
 		root.setTop(buildTopPane(owner));
-		Node left = buildLeftSplit();
-		Node right = buildRightSplit();
-		SplitPane splitPane = new SplitPane(left, right);
-		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
-		splitPane.setOnMouseMoved(eventMouse -> hideOrShowChannelList(splitPane, eventMouse));
-		root.setCenter(splitPane);
+//		Node left = buildLeftSplit();
+//		Node right = buildRightSplit();
+//		SplitPane splitPane = new SplitPane(left, right);
+//		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
+//		splitPane.setOnMouseMoved(eventMouse -> hideOrShowChannelList(splitPane, eventMouse));
+//		root.setCenter(splitPane);
 		return root;
 	}
 
@@ -215,6 +211,7 @@ public class Main extends Application {
 		double x = eventMouse.getX();
 		double y = eventMouse.getY();
 		if (x > pane.getWidth() - Constants.INFO_ZONE_WIDTH && y < Constants.INFO_ZONE_HEIGHT) {
+			this.infoView.setLayoutX(pane.getWidth() - Constants.INFO_VIEW_WIDTH);
 			this.infoView.setVisible(true);
 		} else {
 			this.infoView.setVisible(false);
@@ -224,16 +221,54 @@ public class Main extends Application {
 	@Override
 	public void init() {
 		Utils.getEventBus().register(this);
+		this.embeddedMediaPlayer = mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
+		this.embeddedMediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
+			@Override
+			public void mediaChanged(MediaPlayer mediaPlayer, MediaRef media) {
+				super.mediaChanged(mediaPlayer, media);
+				videoOutput = false;
+				positionChanged = false;
+			}
+
+			@Override
+			public void mediaPlayerReady(MediaPlayer mediaPlayer) {
+				super.mediaPlayerReady(mediaPlayer);
+				LOG.debug("======READY=====");
+			}
+
+			@Override
+			public void playing(MediaPlayer mediaPlayer) {
+				super.playing(mediaPlayer);
+				LOG.debug("======PLAYING=====");
+			}
+
+			@Override
+			public void positionChanged(MediaPlayer mediaPlayer, float newPosition) {
+				super.positionChanged(mediaPlayer, newPosition);
+				positionChanged = true;
+			}
+
+			@Override
+			public void videoOutput(MediaPlayer mediaPlayer, int newCount) {
+				super.videoOutput(mediaPlayer, newCount);
+				LOG.debug("======videoOutput===== {}", newCount);
+				if (newCount > 0) {
+					videoOutput = true;
+				}
+			}
+		});
 	}
 
 	private void initChannels(Window owner) {
 		try {
 			if (!getParameters().getRaw().isEmpty() && !Strings.isNullOrEmpty(getParameters().getRaw().get(0))) {
 				M3UService.getInstance().buildChannels(getParameters().getRaw().get(0));
+				Utils.getEventBus().post(new ChannelListCreatedEvent(true));
 			} else {
 				String mp3Ulist = PreferencesService.getInstance().readProperty(PreferencesService.KEY_IPTV_M3U);
 				if (!mp3Ulist.isBlank()) {
 					M3UService.getInstance().buildChannels(mp3Ulist);
+					Utils.getEventBus().post(new ChannelListCreatedEvent(true));
 				} else {
 					new Preferences(owner);
 				}
@@ -248,33 +283,22 @@ public class Main extends Application {
 		double imageViewWidth = region.getWidth();
 		double imageViewHeight = region.getHeight();
 		if (keepRatio) {
-			IntByReference px = new IntByReference();
-			IntByReference py = new IntByReference();
-			LibVlc.libvlc_video_get_size(this.embeddedMediaPlayer.mediaPlayerInstance(), 0, px, py);
-			double videoWidth = px.getValue();
-			double videoHeight = py.getValue();
-			double scaleWidth = imageViewWidth / videoWidth;
-			double imageViewWidthScaled = scaleWidth * videoWidth;
-			double imageViewHeightScaled = scaleWidth * videoHeight;
-			double y = (imageViewHeight - imageViewHeightScaled) / 2.0;
-			imageView.fitWidthProperty().set(imageViewWidthScaled);
-			imageView.fitHeightProperty().set(imageViewHeightScaled);
-			imageView.setX(0);
-			imageView.setY(y);
+			Dimension dimension = this.embeddedMediaPlayer.video().videoDimension();
+			if (dimension != null) {
+				double videoWidth = dimension.getWidth();
+				double videoHeight = dimension.getHeight();
+				double scaleWidth = imageViewWidth / videoWidth;
+				double imageViewWidthScaled = scaleWidth * videoWidth;
+				double imageViewHeightScaled = scaleWidth * videoHeight;
+				double y = (imageViewHeight - imageViewHeightScaled) / 2.0;
+				imageView.fitWidthProperty().set(imageViewWidthScaled);
+				imageView.fitHeightProperty().set(imageViewHeightScaled);
+				imageView.setX(0);
+				imageView.setY(y);
+			}
 		} else {
 			videoImageView.fitHeightProperty().set(imageViewWidth);
 			videoImageView.fitWidthProperty().set(imageViewWidth);
-		}
-	}
-
-	@Subscribe
-	public void refreshCenter(ChannelListCreatedEvent event) {
-		if (event.isCreated()) {
-			Node left = buildLeftSplit();
-			Node right = buildRightSplit();
-			SplitPane splitPane = new SplitPane(left, right);
-			splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
-			root.setCenter(splitPane);
 		}
 	}
 
@@ -286,27 +310,13 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		initChannels(stage);
 		Scene scene = new Scene(buildRoot(stage), Constants.STAGE_WIDTH, Constants.STAGE_HEIGHT);
 		scene.getStylesheets().add(getClass().getClassLoader().getResource("styles.css").toExternalForm());
 		scene.setFill(Color.TRANSPARENT);
 		stage.setTitle("JPTV");
 		stage.setScene(scene);
 		stage.show();
-		boolean playing = false;
-		if (!getParameters().getRaw().isEmpty()) {
-			playing = embeddedMediaPlayer.media().play(getParameters().getRaw().get(0));
-		} else {
-			if (!PreferencesService.getInstance().readProperty(PreferencesService.KEY_IPTV_M3U).isBlank()) {
-				playing = embeddedMediaPlayer.media()
-						.play(PreferencesService.getInstance().readProperty(PreferencesService.KEY_IPTV_M3U));
-			}
-		}
-		if (playing) {
-			placeVideoImage(this.videoImageView, true);
-			InfoStreamService.getInstance(embeddedMediaPlayer);
-		}
-		LOG.debug("Playing ok ? {}", playing);
+		initChannels(stage);
 	}
 
 	@Override

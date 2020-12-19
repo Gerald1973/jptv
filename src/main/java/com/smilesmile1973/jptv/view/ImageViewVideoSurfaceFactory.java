@@ -77,8 +77,11 @@ public final class ImageViewVideoSurfaceFactory {
 		public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
 			Platform.runLater(() -> pixelBuffer.updateBuffer(pb -> {
 				if (!displayed) {
+					LOG.debug("Image ready.");
 					displayed = true;
+					LOG.debug("Renderer created event send.");
 					Utils.getEventBus().post(new RendererCreatedEvent(true));
+					LOG.debug("Renderer created event sent.");
 				}
 				return null;
 			}));
@@ -87,8 +90,7 @@ public final class ImageViewVideoSurfaceFactory {
 
 	private class PixelBufferVideoSurface extends CallbackVideoSurface {
 		private PixelBufferVideoSurface() {
-			super(ImageViewVideoSurfaceFactory.this.bufferFormatCallback,
-					ImageViewVideoSurfaceFactory.this.renderCallback, true, getVideoSurfaceAdapter());
+			super(ImageViewVideoSurfaceFactory.this.bufferFormatCallback, ImageViewVideoSurfaceFactory.this.renderCallback, true, getVideoSurfaceAdapter());
 		}
 	}
 
