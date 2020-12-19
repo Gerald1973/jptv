@@ -9,7 +9,6 @@ import com.smilesmile1973.jptv.pojo.Channel;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -72,22 +71,6 @@ public class ChannelView extends GridPane {
 		});
 	}
 
-	private Channel getChannel() {
-		return this.channel;
-	}
-
-	private String buildTextLabel() {
-		String result = channel.getTvgName().isBlank() ? "UNK" : channel.getTvgName();
-		if (!this.channel.getTvgName().isBlank()) {
-			result = channel.getTvgName();
-		} else if (!this.channel.getGroupTitle2().isBlank()) {
-			result = this.channel.getGroupTitle2();
-		} else {
-			result = "No name";
-		}
-		return result;
-	}
-
 	private ImageView buildImageView(Channel channel) {
 		ImageView result = new ImageView();
 		if (channel.getTvLogo() != null && !channel.getTvLogo().isBlank()) {
@@ -102,6 +85,22 @@ public class ChannelView extends GridPane {
 			result.setSmooth(true);
 		}
 		return result;
+	}
+
+	private String buildTextLabel() {
+		String result = channel.getTvgName().isBlank() ? "UNK" : channel.getTvgName();
+		if (!this.channel.getTvgName().isBlank()) {
+			result = channel.getTvgName();
+		} else if (!this.channel.getGroupTitle2().isBlank()) {
+			result = this.channel.getGroupTitle2();
+		} else {
+			result = "No name";
+		}
+		return result;
+	}
+
+	private Channel getChannel() {
+		return this.channel;
 	}
 
 	private void loadImage(Channel channel, ImageView imageView) {

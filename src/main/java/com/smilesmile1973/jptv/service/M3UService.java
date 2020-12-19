@@ -24,12 +24,6 @@ public class M3UService {
 
 	private static M3UService instance;
 
-	private Map<String, List<Channel>> channels;
-
-	private M3UService() {
-		channels = new TreeMap<>();
-	}
-
 	public static final M3UService getInstance() {
 		if (instance == null) {
 			instance = new M3UService();
@@ -37,8 +31,32 @@ public class M3UService {
 		return instance;
 	}
 
+	private Map<String, List<Channel>> channels;
+
+	private M3UService() {
+		channels = new TreeMap<>();
+	}
+
+	public Map<String, List<Channel>> buildChannels(String url) throws Exception {
+		channels.clear();
+		List<String> strings = fetchWebSite(url);
+		String[] sources = new String[2];
+		if (strings != null && !strings.isEmpty() && strings.get(0).equals("#EXTM3U")) {
+			for (int i = 1; i < strings.size(); i = i + 2) {
+				sources[0] = strings.get(i);
+				sources[1] = strings.get(i + 1);
+				Channel channel = ChannelConverter.getInstance().toTarget(sources);
+				if (channels.get(channel.getGroupTitle()) == null) {
+					channels.put(channel.getGroupTitle(), new ArrayList<Channel>());
+				}
+				channels.get(channel.getGroupTitle()).add(channel);
+			}
+		}
+		return channels;
+	}
+
 	public List<String> fetchWebSite(String url) throws Exception {
-		List<String> results = new ArrayList<String>();
+		List<String> results = new ArrayList<>();
 		URL resource = new URL(url);
 		InputStream in = resource.openStream();
 		BufferedInputStream buffer = new BufferedInputStream(in);
@@ -60,31 +78,17 @@ public class M3UService {
 		return results;
 	}
 
-	public Map<String, List<Channel>> buildChannels(String url) throws Exception {
-		channels.clear();
-		List<String> strings = fetchWebSite(url);
-		String[] sources = new String[2];
-		if (strings != null && !strings.isEmpty() && strings.get(0).equals("#EXTM3U")) {
-			for (int i = 1; i < strings.size(); i = i + 2) {
-				sources[0] = strings.get(i);
-				sources[1] = strings.get(i + 1);
-				Channel channel = ChannelConverter.getInstance().toTarget(sources);
-				if (channels.get(channel.getGroupTitle()) == null) {
-					channels.put(channel.getGroupTitle(), new ArrayList<Channel>());
-				}
-				channels.get(channel.getGroupTitle()).add(channel);
-			}
-		}
+	public Map<String, List<Channel>> getChannels() {
 		return channels;
+	}
+
+	public Channel getFirst() {
+		return getChannels().entrySet().iterator().next().getValue().get(0);
 	}
 
 	public List<Channel> sortGroup(String group) {
 		List<Channel> channels = this.channels.get(group);
 		channels.sort(Comparator.comparing(Channel::getTvgName));
-		return channels;
-	}
-
-	public Map<String, List<Channel>> getChannels() {
 		return channels;
 	}
 
