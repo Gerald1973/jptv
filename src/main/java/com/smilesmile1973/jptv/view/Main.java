@@ -34,6 +34,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -79,6 +80,8 @@ public class Main extends Application {
 	private BorderPane root;
 
 	private boolean fired = false;
+
+	private Stage stage;
 
 	public Main() {
 	}
@@ -153,7 +156,11 @@ public class Main extends Application {
 		videoPane.getChildren().add(infoView);
 		infoView.setLayoutX(videoPane.getWidth() - Constants.INFO_VIEW_WIDTH);
 		infoView.setVisible(false);
-
+		videoPane.setOnMouseClicked(eventMouse -> {
+			if (eventMouse.getButton().equals(MouseButton.PRIMARY) && eventMouse.getClickCount() == 2) {
+				getStage().setFullScreen(!getStage().isFullScreen());
+			}
+		});
 		videoPane.setOnMouseMoved(eventMouse -> hideOrShowInfo(videoPane, eventMouse));
 		return videoPane;
 	}
@@ -162,12 +169,6 @@ public class Main extends Application {
 		root = new BorderPane();
 		root.setId("background");
 		root.setTop(buildTopPane(owner));
-//		Node left = buildLeftSplit();
-//		Node right = buildRightSplit();
-//		SplitPane splitPane = new SplitPane(left, right);
-//		splitPane.setDividerPosition(0, Constants.CHANNEL_LIST_WIDTH / Constants.STAGE_WIDTH);
-//		splitPane.setOnMouseMoved(eventMouse -> hideOrShowChannelList(splitPane, eventMouse));
-//		root.setCenter(splitPane);
 		return root;
 	}
 
@@ -195,6 +196,10 @@ public class Main extends Application {
 			}
 			titledPane.setContent(pane);
 		}
+	}
+
+	public Stage getStage() {
+		return stage;
 	}
 
 	private void hideOrShowChannelList(SplitPane splitPane, MouseEvent eventMouse) {
@@ -308,6 +313,10 @@ public class Main extends Application {
 		InfoStreamService.getInstance(embeddedMediaPlayer);
 	}
 
+	public void setStage(Stage stage) {
+		this.stage = stage;
+	}
+
 	@Override
 	public void start(Stage stage) throws Exception {
 		Scene scene = new Scene(buildRoot(stage), Constants.STAGE_WIDTH, Constants.STAGE_HEIGHT);
@@ -316,6 +325,7 @@ public class Main extends Application {
 		stage.setTitle("JPTV");
 		stage.setScene(scene);
 		stage.show();
+		setStage(stage);
 		initChannels(stage);
 	}
 
