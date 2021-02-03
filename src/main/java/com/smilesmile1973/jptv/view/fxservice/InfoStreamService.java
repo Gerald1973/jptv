@@ -1,7 +1,5 @@
 package com.smilesmile1973.jptv.view.fxservice;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +10,6 @@ import com.smilesmile1973.jptv.event.EventMediaStatistics;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
-import uk.co.caprica.vlcj.media.AudioTrackInfo;
 import uk.co.caprica.vlcj.media.InfoApi;
 import uk.co.caprica.vlcj.media.MediaStatistics;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
@@ -55,15 +52,6 @@ public class InfoStreamService extends ScheduledService<Void> {
 			protected Void call() throws Exception {
 				InfoApi infoApi = mediaPlayer.media().info();
 				MediaStatistics mediaStatics = infoApi.statistics();
-				List<AudioTrackInfo> audioTracks = infoApi.audioTracks();
-				for (AudioTrackInfo audioTrackInfo : audioTracks) {
-					LOG.debug("Audio track info bit rate         : {}", audioTrackInfo.bitRate());
-					LOG.debug("Audio track info codec            : {}", audioTrackInfo.codecDescription());
-					LOG.debug("Audio track info codec            : {}", audioTrackInfo.codecName());
-					LOG.debug("Audio track info codec description: {}", audioTrackInfo.description());
-					LOG.debug("Audio track info language         : {}", audioTrackInfo.language());
-
-				}
 				eventMediaStatistics = new EventMediaStatistics(mediaStatics);
 				Utils.getEventBus().post(eventMediaStatistics);
 				return null;

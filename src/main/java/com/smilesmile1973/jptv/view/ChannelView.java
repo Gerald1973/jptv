@@ -1,8 +1,10 @@
 package com.smilesmile1973.jptv.view;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.smilesmile1973.jptv.Utils;
 import com.smilesmile1973.jptv.event.EventChannel;
 import com.smilesmile1973.jptv.pojo.Channel;
@@ -88,10 +90,12 @@ public class ChannelView extends GridPane {
 	}
 
 	private String buildTextLabel() {
-		String result = channel.getTvgName().isBlank() ? "UNK" : channel.getTvgName();
-		if (!this.channel.getTvgName().isBlank()) {
+		String result = null;
+		if (StringUtils.isNotBlank(this.channel.getTvgName())) {
 			result = channel.getTvgName();
-		} else if (!this.channel.getGroupTitle2().isBlank()) {
+		} else if (StringUtils.isNotBlank(this.channel.getTvgId())) {
+			result = this.channel.getTvgId();
+		} else if (StringUtils.isNotBlank(this.channel.getGroupTitle2())) {
 			result = this.channel.getGroupTitle2();
 		} else {
 			result = "No name";

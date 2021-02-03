@@ -3,9 +3,11 @@ package com.smilesmile1973.jptv.converter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.smilesmile1973.jptv.pojo.Channel;
 
 public class ChannelConverter implements Converter<String[], Channel> {
@@ -16,27 +18,27 @@ public class ChannelConverter implements Converter<String[], Channel> {
 
 	private static final String GR_LENGTH = "length";
 
-	private static final Pattern PA_LENGTH = Pattern.compile("#EXTINF:(?<length>[-]?[0-9]+)");
+	private static final Pattern PA_LENGTH = Pattern.compile("#EXTINF:(?<length>[-]?[0-9]+)", Pattern.CASE_INSENSITIVE);
 
 	private static final String GR_TVGID = "tvgId";
 
-	private static final Pattern PA_TVGID = Pattern.compile("tvg-id=\"(?<tvgId>[^\\\"]*)");
+	private static final Pattern PA_TVGID = Pattern.compile("tvg-id=\"(?<tvgId>[^\\\"]*)", Pattern.CASE_INSENSITIVE);
 
 	private static final String GR_TVLOGO = "tvLogo";
 
-	private static final Pattern PA_TVLOGO = Pattern.compile("tvg-logo=\"(?<tvLogo>[^\\\"]*)");
+	private static final Pattern PA_TVLOGO = Pattern.compile("tvg-logo=\"(?<tvLogo>[^\\\"]*)", Pattern.CASE_INSENSITIVE);
 
 	private static final String GR_TVGNAME = "tvgName";
 
-	private static final Pattern PA_TVGNAME = Pattern.compile("tvg-name=\\\"(?<tvgName>[^\\\\\\\"]*)");
+	private static final Pattern PA_TVGNAME = Pattern.compile("tvg-name=\"(?<tvgName>[^\\\"]*)", Pattern.CASE_INSENSITIVE);
 
 	private static final String GR_GROUPTITLE = "groupTitle";
 
-	private static final Pattern PA_GROUPTITLE = Pattern.compile("group-title=\"(?<groupTitle>[^\\\"]*)\"");
+	private static final Pattern PA_GROUPTITLE = Pattern.compile("group-title=\"(?<groupTitle>[^\\\"]*)\"", Pattern.CASE_INSENSITIVE);
 
 	private static final String GR_GROUPTITLE2 = "groupTitle2";
 
-	private static final Pattern PA_GROUPTITLE2 = Pattern.compile("group-title=\".*\",(?<groupTitle2>.*)");
+	private static final Pattern PA_GROUPTITLE2 = Pattern.compile("group-title=\".*\",(?<groupTitle2>.*)", Pattern.CASE_INSENSITIVE);
 
 	public static final ChannelConverter getInstance() {
 		if (instance == null) {
@@ -85,9 +87,17 @@ public class ChannelConverter implements Converter<String[], Channel> {
 		Channel result = new Channel();
 		String info = source[0];
 		String url = source[1];
-		result.setLength(Long.parseLong(fetch(info, PA_LENGTH, GR_LENGTH)));
+		String tmp = "";
+		tmp = fetch(info, PA_LENGTH, GR_LENGTH);
+		if (!Strings.isNullOrEmpty(tmp)) {
+			result.setLength(Long.parseLong(tmp));
+		}
 		result.setTvgId(fetch(info, PA_TVGID, GR_TVGID));
-		result.setTvgName(fetch(info, PA_TVGNAME, GR_TVGNAME));
+		tmp = fetch(info, PA_TVGNAME, GR_TVGNAME);
+		if (StringUtils.isEmpty(tmp)) {
+			LOG.debug("No name : {}", info);
+		}
+		result.setTvgName(tmp);
 		result.setTvLogo(fetch(info, PA_TVLOGO, GR_TVLOGO));
 		result.setGroupTitle(fetch(info, PA_GROUPTITLE, GR_GROUPTITLE));
 		result.setGroupTitle2(fetch(info, PA_GROUPTITLE2, GR_GROUPTITLE2));
