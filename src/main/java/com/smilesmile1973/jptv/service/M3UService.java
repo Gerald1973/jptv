@@ -42,7 +42,7 @@ public class M3UService {
 		List<String> strings = fetchWebSite(url);
 		String[] sources = new String[2];
 		if (strings != null && !strings.isEmpty() && strings.get(0).equals("#EXTM3U")) {
-			for (int i = 1; i < strings.size(); i = i + 2) {
+			for (int i = 1; i < strings.size()-2; i = i + 2) {
 				sources[0] = strings.get(i);
 				sources[1] = strings.get(i + 1);
 				Channel channel = ChannelConverter.getInstance().toTarget(sources);
