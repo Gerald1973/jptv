@@ -3,3 +3,5 @@
 /jptv.config
 /.settings/
 /bin/
+/.project
+/dependency-reduced-pom.xml
