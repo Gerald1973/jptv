@@ -49,6 +49,7 @@ import uk.co.caprica.vlcj.media.MediaRef;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+import uk.co.caprica.vlcj.player.embedded.videosurface.CallbackVideoSurface;
 
 /**
  * @author smilesmile1973@gmail.com
@@ -133,7 +134,8 @@ public class Main extends Application {
 	private Node buildRightSplit() {
 		Pane videoPane = new Pane();
 		videoPane.setId("videoPane");
-		embeddedMediaPlayer.videoSurface().set(ImageViewVideoSurfaceFactory.videoSurfaceForImageView(videoImageView));
+		CallbackVideoSurface callBackVideoSurface = PixelBufferInstance.getInstance().buildCallBackVideoSurface(videoImageView);
+		embeddedMediaPlayer.videoSurface().set(callBackVideoSurface);
 		videoPane.widthProperty().addListener((observableValue, oldValue, newValue) -> {
 			if (keepRatio) {
 				placeVideoImage(videoImageView, keepRatio);
@@ -180,8 +182,13 @@ public class Main extends Application {
 
 	@Subscribe
 	public void changeChannel(EventChannel eventChannel) {
-		LOG.debug("Change channel to {}:", eventChannel.getChannel().getChannelURL());
-		embeddedMediaPlayer.media().play(eventChannel.getChannel().getChannelURL());
+		String channelUrl = eventChannel.getChannel().getChannelURL();
+		LOG.debug("Change channel to {}:", channelUrl);
+		PixelBufferInstance.getInstance().setDisplayed(false);
+		boolean result  = embeddedMediaPlayer.media().play(channelUrl);
+		if (!result) {
+			LOG.error("The url {} can not be played.");
+		}
 	}
 
 	private void expandTitledPane(TitledPane titledPane) {
@@ -309,7 +316,6 @@ public class Main extends Application {
 
 	@Subscribe
 	public void rendererCreated(RendererCreatedEvent event) {
-		placeVideoImage(videoImageView, true);
 		InfoStreamService.getInstance(embeddedMediaPlayer);
 	}
 

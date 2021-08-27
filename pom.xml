@@ -8,9 +8,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>13</maven.compiler.source>
-		<maven.compiler.target>13</maven.compiler.target>
-		<openjfx.version>15.0.1</openjfx.version>
+		<maven.compiler.source>16</maven.compiler.source>
+		<maven.compiler.target>16</maven.compiler.target>
+		<openjfx.version>16</openjfx.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>uk.co.caprica</groupId>
 			<artifactId>vlcj</artifactId>
-			<version>4.7.0</version>
+			<version>4.7.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
