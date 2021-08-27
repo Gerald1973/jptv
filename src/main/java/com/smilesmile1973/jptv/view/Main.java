@@ -3,7 +3,6 @@
  */
 package com.smilesmile1973.jptv.view;
 
-import java.awt.Dimension;
 import java.util.List;
 import java.util.Set;
 
@@ -45,9 +44,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
-import uk.co.caprica.vlcj.media.MediaRef;
-import uk.co.caprica.vlcj.player.base.MediaPlayer;
-import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import uk.co.caprica.vlcj.player.embedded.videosurface.CallbackVideoSurface;
 
@@ -64,23 +60,13 @@ public class Main extends Application {
 		launch(args);
 	}
 
-	private boolean positionChanged = false;
-
-	private boolean videoOutput = false;
-
 	private final MediaPlayerFactory mediaPlayerFactory = new MediaPlayerFactory();
 
 	private EmbeddedMediaPlayer embeddedMediaPlayer;
 
-	private boolean keepRatio = true;
-
-	private final ImageView videoImageView = new ImageView();
-
 	private final InfoView infoView = new InfoView();
 
 	private BorderPane root;
-
-	private boolean fired = false;
 
 	private Stage stage;
 
@@ -95,8 +81,8 @@ public class Main extends Application {
 			SplitPane splitPane = new SplitPane(left, right);
 			splitPane.setDividerPosition(0, 0);
 			root.setCenter(splitPane);
-			embeddedMediaPlayer.media().play(M3UService.getInstance().getFirst().getChannelURL());
 			splitPane.setOnMouseMoved(eventMouse -> hideOrShowChannelList(splitPane, eventMouse));
+			embeddedMediaPlayer.media().play(M3UService.getInstance().getFirst().getChannelURL());
 		}
 	}
 
@@ -114,7 +100,8 @@ public class Main extends Application {
 			accordion.getPanes().add(titledPane);
 			titledPane.setExpanded(false);
 		}
-		accordion.expandedPaneProperty().addListener((observable, oldValue, titledPane) -> expandTitledPane(titledPane));
+		accordion.expandedPaneProperty()
+				.addListener((observable, oldValue, titledPane) -> expandTitledPane(titledPane));
 		scrollPane.setMinWidth(0);
 		scrollPane.setMaxWidth(Constants.CHANNEL_LIST_WIDTH);
 		return scrollPane;
@@ -134,27 +121,17 @@ public class Main extends Application {
 	private Node buildRightSplit() {
 		Pane videoPane = new Pane();
 		videoPane.setId("videoPane");
-		CallbackVideoSurface callBackVideoSurface = PixelBufferInstance.getInstance().buildCallBackVideoSurface(videoImageView);
+		CallbackVideoSurface callBackVideoSurface = PixelBufferInstance.getInstance().buildCallBackVideoSurface();
 		embeddedMediaPlayer.videoSurface().set(callBackVideoSurface);
 		videoPane.widthProperty().addListener((observableValue, oldValue, newValue) -> {
-			if (keepRatio) {
-				placeVideoImage(videoImageView, keepRatio);
-			} else {
-				videoImageView.fitHeightProperty().set(videoPane.getHeight());
-				videoImageView.fitWidthProperty().set(newValue.doubleValue());
-			}
+			placeVideoImage();
 		});
 
 		videoPane.heightProperty().addListener((observableValue, oldValue, newValue) -> {
-			if (!keepRatio) {
-				videoImageView.fitHeightProperty().set(videoPane.getHeight());
-				videoImageView.fitWidthProperty().set(newValue.doubleValue());
-			} else {
-				placeVideoImage(videoImageView, keepRatio);
-			}
+			placeVideoImage();
 		});
 
-		videoPane.getChildren().add(videoImageView);
+		videoPane.getChildren().add(PixelBufferInstance.getInstance().getImageView());
 		videoPane.getChildren().add(infoView);
 		infoView.setLayoutX(videoPane.getWidth() - Constants.INFO_VIEW_WIDTH);
 		infoView.setVisible(false);
@@ -185,7 +162,7 @@ public class Main extends Application {
 		String channelUrl = eventChannel.getChannel().getChannelURL();
 		LOG.debug("Change channel to {}:", channelUrl);
 		PixelBufferInstance.getInstance().setDisplayed(false);
-		boolean result  = embeddedMediaPlayer.media().play(channelUrl);
+		boolean result = embeddedMediaPlayer.media().play(channelUrl);
 		if (!result) {
 			LOG.error("The url {} can not be played.");
 		}
@@ -234,41 +211,6 @@ public class Main extends Application {
 	public void init() {
 		Utils.getEventBus().register(this);
 		this.embeddedMediaPlayer = mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
-		this.embeddedMediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
-			@Override
-			public void mediaChanged(MediaPlayer mediaPlayer, MediaRef media) {
-				super.mediaChanged(mediaPlayer, media);
-				videoOutput = false;
-				positionChanged = false;
-			}
-
-			@Override
-			public void mediaPlayerReady(MediaPlayer mediaPlayer) {
-				super.mediaPlayerReady(mediaPlayer);
-				LOG.debug("======READY=====");
-			}
-
-			@Override
-			public void playing(MediaPlayer mediaPlayer) {
-				super.playing(mediaPlayer);
-				LOG.debug("======PLAYING=====");
-			}
-
-			@Override
-			public void positionChanged(MediaPlayer mediaPlayer, float newPosition) {
-				super.positionChanged(mediaPlayer, newPosition);
-				positionChanged = true;
-			}
-
-			@Override
-			public void videoOutput(MediaPlayer mediaPlayer, int newCount) {
-				super.videoOutput(mediaPlayer, newCount);
-				LOG.debug("======videoOutput===== {}", newCount);
-				if (newCount > 0) {
-					videoOutput = true;
-				}
-			}
-		});
 	}
 
 	private void initChannels(Window owner) {
@@ -290,28 +232,13 @@ public class Main extends Application {
 		}
 	}
 
-	private void placeVideoImage(ImageView imageView, boolean keepRatio) {
+	private void placeVideoImage() {
+		ImageView imageView = PixelBufferInstance.getInstance().getImageView();
 		Region region = (Region) imageView.getParent();
-		double imageViewWidth = region.getWidth();
-		double imageViewHeight = region.getHeight();
-		if (keepRatio) {
-			Dimension dimension = this.embeddedMediaPlayer.video().videoDimension();
-			if (dimension != null) {
-				double videoWidth = dimension.getWidth();
-				double videoHeight = dimension.getHeight();
-				double scaleWidth = imageViewWidth / videoWidth;
-				double imageViewWidthScaled = scaleWidth * videoWidth;
-				double imageViewHeightScaled = scaleWidth * videoHeight;
-				double y = (imageViewHeight - imageViewHeightScaled) / 2.0;
-				imageView.fitWidthProperty().set(imageViewWidthScaled);
-				imageView.fitHeightProperty().set(imageViewHeightScaled);
-				imageView.setX(0);
-				imageView.setY(y);
-			}
-		} else {
-			videoImageView.fitHeightProperty().set(imageViewWidth);
-			videoImageView.fitWidthProperty().set(imageViewWidth);
-		}
+		imageView.fitWidthProperty().set((int) region.getWidth());
+		imageView.fitHeightProperty().set((int) region.getHeight());
+		imageView.setX(0);
+		imageView.setY(0);
 	}
 
 	@Subscribe

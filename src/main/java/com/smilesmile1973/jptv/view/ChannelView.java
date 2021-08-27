@@ -4,14 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
 import com.smilesmile1973.jptv.Utils;
 import com.smilesmile1973.jptv.event.EventChannel;
 import com.smilesmile1973.jptv.pojo.Channel;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -49,12 +47,6 @@ public class ChannelView extends GridPane {
 		label.setMaxWidth(LABEL_MAX_WIDTH);
 		label.setMinWidth(LABEL_MAX_WIDTH);
 		label.setWrapText(true);
-		label.setOnMouseClicked(event -> {
-			ChannelView channelView = ((ChannelView) ((Node) event.getSource()).getParent());
-			LOG.debug("Change to channel {}", channelView.getChannel().getChannelURL());
-			Utils.getEventBus().post(new EventChannel(channel));
-		});
-
 		ColumnConstraints col0 = new ColumnConstraints();
 		ColumnConstraints col1 = new ColumnConstraints();
 		col0.setPrefWidth(LOGO_IMAGE_WIDTH);
@@ -62,31 +54,13 @@ public class ChannelView extends GridPane {
 		col0.setMaxWidth(LOGO_IMAGE_WIDTH);
 		col1.setMaxWidth(LABEL_MAX_WIDTH);
 		this.getColumnConstraints().addAll(col0, col1);
-
 		this.add(pane, 0, 0);
 		this.add(label, 1, 0);
-
 		this.setOnMouseClicked(event -> {
 			ChannelView channelView = (ChannelView) event.getSource();
 			LOG.debug("Change to channel {}", channelView.getChannel().getChannelURL());
 			Utils.getEventBus().post(new EventChannel(channel));
 		});
-	}
-
-	private ImageView buildImageView(Channel channel) {
-		ImageView result = new ImageView();
-		if (channel.getTvLogo() != null && !channel.getTvLogo().isBlank()) {
-			Image image = new Image(channel.getTvLogo(), true);
-			result.setImage(image);
-			if (image.getHeight() > image.getWidth()) {
-				result.setFitHeight(LOGO_SIZE);
-			} else {
-				result.setFitWidth(LOGO_SIZE);
-			}
-			result.setPreserveRatio(true);
-			result.setSmooth(true);
-		}
-		return result;
 	}
 
 	private String buildTextLabel() {
@@ -130,5 +104,4 @@ public class ChannelView extends GridPane {
 			th.start();
 		}
 	}
-
 }

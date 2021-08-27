@@ -19,20 +19,20 @@ public class InfoView extends Pane {
 
 	private static final Logger LOG = LoggerFactory.getLogger(InfoView.class);
 
-	Text txtAudioBuffersLost = new Text();
-	Text txtAudioBuffersPlayed = new Text();
-	Text txtDecodedAudio = new Text();
-	Text txtDecodedVideo = new Text();
-	Text txtDemuxBytesRead = new Text();
-	Text txtDemuxCorrupted = new Text();
-	Text txtDemuxDiscontinuity = new Text();
-	Text txtInputBitrate = new Text();
-	Text txtInputBytesRead = new Text();
-	Text txtPicturesLost = new Text();
-	Text txtSendBitrate = new Text();
-	Text txtSentBytes = new Text();
-	Text txtSentPackets = new Text();
-	Text txtPicturesDisplayed = new Text();
+	private Text txtAudioBuffersLost = new Text();
+	private Text txtAudioBuffersPlayed = new Text();
+	private Text txtDecodedAudio = new Text();
+	private Text txtDecodedVideo = new Text();
+	private Text txtDemuxBytesRead = new Text();
+	private Text txtDemuxCorrupted = new Text();
+	private Text txtDemuxDiscontinuity = new Text();
+	private Text txtInputBitrate = new Text();
+	private Text txtInputBytesRead = new Text();
+	private Text txtPicturesLost = new Text();
+	private Text txtSendBitrate = new Text();
+	private Text txtSentBytes = new Text();
+	private Text txtSentPackets = new Text();
+	private Text txtPicturesDisplayed = new Text();
 
 	public InfoView() {
 		this.init();

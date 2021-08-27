@@ -5,6 +5,7 @@
   <artifactId>jptv</artifactId>
   <version>1.0-SNAPSHOT</version>
   <build>
+    <finalName>JPTV</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>

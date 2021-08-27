@@ -36,13 +36,14 @@ public class PixelBufferInstance {
 
 	private int height = (int) Constants.STAGE_HEIGHT;
 
-	private ImageView imageView;
+	private final ImageView imageView;
 
 	private PixelBuffer<ByteBuffer> pixelBuffer;
 
 	private int width = (int) Constants.STAGE_WIDTH;
 
 	private PixelBufferInstance() {
+		this.imageView = new ImageView();
 	}
 
 	public int getHeight() {
@@ -65,10 +66,6 @@ public class PixelBufferInstance {
 		this.height = height;
 	}
 
-	public void setImageView(ImageView imageView) {
-		this.imageView = imageView;
-	}
-
 	public void setPixelBuffer(PixelBuffer<ByteBuffer> pixelBuffer) {
 		this.pixelBuffer = pixelBuffer;
 		this.imageView.setImage(new WritableImage(pixelBuffer));
@@ -77,13 +74,9 @@ public class PixelBufferInstance {
 	public void setWidth(int width) {
 		this.width = width;
 	}
-	// super(ImageViewVideoSurfaceFactory.this.bufferFormatCallback,
-	// ImageViewVideoSurfaceFactory.this.renderCallback, true,
-	// getVideoSurfaceAdapter());
 
-	public CallbackVideoSurface buildCallBackVideoSurface(ImageView imageView) {
-		this.imageView = imageView;
-		BufferFormatCallback bufferFormatCallback = new BufferFormatCallbackImpl(imageView);
+	public CallbackVideoSurface buildCallBackVideoSurface() {
+		BufferFormatCallback bufferFormatCallback = new BufferFormatCallbackImpl();
 		RenderCallback renderCallBack = new RenderCallbackImpl();
 		CallbackVideoSurface result = new CallbackVideoSurface(bufferFormatCallback, renderCallBack, false,
 				getVideoSurfaceAdapter());
