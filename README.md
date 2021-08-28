@@ -3,12 +3,12 @@
 ## Description
 
 Wit this software you can access some IPTV channel around the world, depending your M3u provider.  
-I did this software to try JavaFX 15 and test the PixelBuffer available form JDK 13.
+I did this software to try JavaFX 15 and test the PixelBuffer available from JDK 13.
 
 ### Prerequisite
 
 OpenJDK (Open Java Development Toolkit) must be installed.  
-You can download the last version at the following URL:  
+You can download the last version (_16 at the time_) at the following URL:  
 <https://openjdk.java.net/>
 
 VIDEOLAN aka VLC must be installed on your computer.  
@@ -38,4 +38,12 @@ In this case, a popup will be displaying inviting you to enter an MRL (aka URL) 
 
 #### Desktop
 
-If you have installed Java with an setup for windows, for example the Orcale JDK, then; you can use it by double click on it.
+If you have installed Java with an setup for windows, for example the Oracle JDK, then, you can use it by double clicking on it.
+
+### User Interface
+
+| Action                                                | Result                         |
+| ----------------------------------------------------- | ------------------------------ |
+| Move the mouse pointer on the left of the window      | The channels list will appear  |
+| Move the mouse pointer on the top right of the window | The technical info will appear |
+| Double inside the window                              | Toggle full screen             |
