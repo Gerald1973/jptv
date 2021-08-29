@@ -17,6 +17,7 @@ import com.smilesmile1973.jptv.event.ChannelListCreatedEvent;
 import com.smilesmile1973.jptv.event.EventChannel;
 import com.smilesmile1973.jptv.event.RendererCreatedEvent;
 import com.smilesmile1973.jptv.pojo.Channel;
+import com.smilesmile1973.jptv.service.AwakeRobotService;
 import com.smilesmile1973.jptv.service.M3UService;
 import com.smilesmile1973.jptv.service.PreferencesService;
 import com.smilesmile1973.jptv.view.fxservice.InfoStreamService;
@@ -164,7 +165,7 @@ public class Main extends Application {
 		PixelBufferInstance.getInstance().setDisplayed(false);
 		boolean result = embeddedMediaPlayer.media().play(channelUrl);
 		if (!result) {
-			LOG.error("The url {} can not be played.");
+			LOG.error("The url {} can not be played.", channelUrl);
 		}
 	}
 
@@ -260,6 +261,7 @@ public class Main extends Application {
 		stage.show();
 		setStage(stage);
 		initChannels(stage);
+		AwakeRobotService.getInstance();
 	}
 
 	@Override

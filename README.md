@@ -2,7 +2,7 @@
 
 ## Description
 
-Wit this software you can access some IPTV channel around the world, depending your M3u provider.  
+With this software you can access some IPTV channel around the world, depending your M3u provider.  
 I did this software to try JavaFX 15 and test the PixelBuffer available from JDK 13.
 
 ### Prerequisite

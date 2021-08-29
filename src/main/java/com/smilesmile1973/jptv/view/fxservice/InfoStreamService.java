@@ -58,20 +58,4 @@ public class InfoStreamService extends ScheduledService<Void> {
 			}
 		};
 	}
-
-	@Override
-	protected void failed() {
-		super.failed();
-	}
-
-	@Override
-	public void reset() {
-		super.reset();
-	}
-
-	@Override
-	protected void succeeded() {
-		super.succeeded();
-	}
-
 }
