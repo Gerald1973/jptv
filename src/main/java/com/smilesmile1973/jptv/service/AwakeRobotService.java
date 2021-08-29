@@ -1,8 +1,6 @@
 package com.smilesmile1973.jptv.service;
 
 import java.awt.AWTException;
-import java.awt.MouseInfo;
-import java.awt.Point;
 import java.awt.Robot;
 
 import org.slf4j.Logger;
@@ -11,6 +9,7 @@ import com.smilesmile1973.jptv.Constants;
 
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
+import javafx.scene.input.KeyCode;
 import javafx.util.Duration;
 
 public class AwakeRobotService extends ScheduledService<Void> {
@@ -30,19 +29,10 @@ public class AwakeRobotService extends ScheduledService<Void> {
 		return instance;
 	}
 
-	int mousePosX;
-
-	int mousePosY;
-
-	boolean autoInc;
-
 	private final Robot robot;
 
 	private AwakeRobotService() throws AWTException {
 		robot = new Robot();
-		Point point = MouseInfo.getPointerInfo().getLocation();
-		mousePosX = point.x;
-		mousePosY = point.y;
 		Duration duration = new Duration(Constants.ROBOT_ACTION_INTERVAL_MS);
 		setDelay(duration);
 		setPeriod(duration);
@@ -56,20 +46,10 @@ public class AwakeRobotService extends ScheduledService<Void> {
 
 			@Override
 			protected Void call() throws Exception {
-				if (autoInc) {
-					mousePosX++;
-					mousePosY++;
-					autoInc = false;
-				} else {
-					mousePosX--;
-					mousePosY--;
-					autoInc = true;
-				}
-				robot.mouseMove(mousePosX, mousePosY);
-				LOG.info("Robot awaker trigered. X: {} Y:{}", mousePosX, mousePosY);
+				robot.keyPress(KeyCode.F15.getCode());
+				LOG.info("Windows wake up with F15");
 				return null;
 			}
-
 		};
 	}
 
