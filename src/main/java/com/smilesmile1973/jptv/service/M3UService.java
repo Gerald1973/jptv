@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -40,16 +41,23 @@ public class M3UService {
 	public Map<String, List<Channel>> buildChannels(String url) throws Exception {
 		channels.clear();
 		List<String> strings = fetchWebSite(url);
-		String[] sources = new String[2];
-		if (strings != null && !strings.isEmpty() && strings.get(0).equals("#EXTM3U")) {
-			for (int i = 1; i < strings.size()-2; i = i + 2) {
-				sources[0] = strings.get(i);
-				sources[1] = strings.get(i + 1);
+		Iterator<String> i = strings.iterator();
+		List<String> sources = new ArrayList<String>();
+		while (i.hasNext()) {
+			String string = i.next();
+			if (string.startsWith("#EXTM3U")) {
+				LOG.info("Header #EXTM3U");
+			}
+			if (!string.startsWith("http")) {
+				sources.add(string);
+			} else {
+				sources.add(string);
 				Channel channel = ChannelConverter.getInstance().toTarget(sources);
 				if (channels.get(channel.getGroupTitle()) == null) {
 					channels.put(channel.getGroupTitle(), new ArrayList<Channel>());
 				}
 				channels.get(channel.getGroupTitle()).add(channel);
+				sources = new ArrayList<>();
 			}
 		}
 		return channels;
