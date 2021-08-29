@@ -47,7 +47,7 @@ public class AwakeRobotService extends ScheduledService<Void> {
 			@Override
 			protected Void call() throws Exception {
 				robot.keyPress(KeyCode.F24.getCode());
-				LOG.info("Windows wake up with F15");
+				LOG.info("Windows wake up with F24");
 				return null;
 			}
 		};
