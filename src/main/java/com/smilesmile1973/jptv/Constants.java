@@ -23,6 +23,11 @@ public class Constants {
 	 */
 	public static final double REFRESH_INFO_INTERVAL_MS = 1000;
 
+	/**
+	 * robot action to avoid computer sleep in ms
+	 */
+	public static final double ROBOT_ACTION_INTERVAL_MS = 10000;
+
 	private Constants() {
 	}
 
