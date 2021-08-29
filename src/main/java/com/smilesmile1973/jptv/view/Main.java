@@ -6,6 +6,7 @@ package com.smilesmile1973.jptv.view;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,12 @@ public class Main extends Application {
 			splitPane.setDividerPosition(0, 0);
 			root.setCenter(splitPane);
 			splitPane.setOnMouseMoved(eventMouse -> hideOrShowChannelList(splitPane, eventMouse));
-			embeddedMediaPlayer.media().play(M3UService.getInstance().getFirst().getChannelURL());
+			Channel channel = M3UService.getInstance().getFirst();
+			if (StringUtils.isBlank(channel.getOption())) {
+				embeddedMediaPlayer.media().play(channel.getChannelURL());
+			} else {
+				embeddedMediaPlayer.media().play(channel.getChannelURL(), channel.getOption());
+			}
 		}
 	}
 
@@ -160,12 +166,13 @@ public class Main extends Application {
 
 	@Subscribe
 	public void changeChannel(EventChannel eventChannel) {
-		String channelUrl = eventChannel.getChannel().getChannelURL();
-		LOG.debug("Change channel to {}:", channelUrl);
+		Channel channel = eventChannel.getChannel();
+		LOG.debug("Change channel to {}:", channel.getChannelURL());
 		PixelBufferInstance.getInstance().setDisplayed(false);
-		boolean result = embeddedMediaPlayer.media().play(channelUrl);
-		if (!result) {
-			LOG.error("The url {} can not be played.", channelUrl);
+		if (StringUtils.isBlank(channel.getOption())) {
+			embeddedMediaPlayer.media().play(channel.getChannelURL());
+		} else {
+			embeddedMediaPlayer.media().play(channel.getChannelURL(), channel.getOption());
 		}
 	}
 
