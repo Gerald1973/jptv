@@ -42,7 +42,7 @@ public class M3UService {
 		channels.clear();
 		List<String> strings = fetchWebSite(url);
 		Iterator<String> i = strings.iterator();
-		List<String> sources = new ArrayList<String>();
+		List<String> sources = new ArrayList<>();
 		while (i.hasNext()) {
 			String string = i.next();
 			if (string.startsWith("#EXTM3U")) {
@@ -54,7 +54,7 @@ public class M3UService {
 				sources.add(string);
 				Channel channel = ChannelConverter.getInstance().toTarget(sources);
 				if (channels.get(channel.getGroupTitle()) == null) {
-					channels.put(channel.getGroupTitle(), new ArrayList<Channel>());
+					channels.put(channel.getGroupTitle(), new ArrayList<>());
 				}
 				channels.get(channel.getGroupTitle()).add(channel);
 				sources = new ArrayList<>();
@@ -95,9 +95,9 @@ public class M3UService {
 	}
 
 	public List<Channel> sortGroup(String group) {
-		List<Channel> channels = this.channels.get(group);
-		channels.sort(Comparator.comparing(Channel::getTvgName));
-		return channels;
+		List<Channel> tmpChannels = this.channels.get(group);
+		tmpChannels.sort(Comparator.comparing(Channel::getTvgName));
+		return tmpChannels;
 	}
 
 }
