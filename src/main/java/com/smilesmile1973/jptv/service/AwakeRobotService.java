@@ -1,7 +1,6 @@
 package com.smilesmile1973.jptv.service;
 
 import java.awt.AWTException;
-import java.awt.Robot;
 
 import org.slf4j.Logger;
 
@@ -9,7 +8,6 @@ import com.smilesmile1973.jptv.Constants;
 
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
-import javafx.scene.input.KeyCode;
 import javafx.util.Duration;
 
 public class AwakeRobotService extends ScheduledService<Void> {
@@ -22,22 +20,18 @@ public class AwakeRobotService extends ScheduledService<Void> {
 		if (instance == null) {
 			try {
 				instance = new AwakeRobotService();
-			} catch (AWTException e) {
-				LOG.error("Robot not created.", e);
+			} catch (final AWTException e) {
+				e.printStackTrace();
 			}
 		}
 		return instance;
 	}
 
-	private final Robot robot;
-
 	private AwakeRobotService() throws AWTException {
-		robot = new Robot();
-		Duration duration = new Duration(Constants.ROBOT_ACTION_INTERVAL_MS);
-		setDelay(duration);
-		setPeriod(duration);
-		start();
-		LOG.info("AwakeRobotService instanciated.");
+		final Duration duration = new Duration(Constants.ROBOT_ACTION_INTERVAL_MS);
+		this.setDelay(duration);
+		this.setPeriod(duration);
+		this.start();
 	}
 
 	@Override
@@ -46,8 +40,7 @@ public class AwakeRobotService extends ScheduledService<Void> {
 
 			@Override
 			protected Void call() throws Exception {
-				robot.keyPress(KeyCode.F24.getCode());
-				LOG.info("Windows wake up with F24");
+				SystemService.getInstance().disableGoToSleep();
 				return null;
 			}
 		};

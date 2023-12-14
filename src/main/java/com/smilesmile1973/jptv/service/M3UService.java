@@ -32,19 +32,19 @@ public class M3UService {
 		return instance;
 	}
 
-	private Map<String, List<Channel>> channels;
+	private final Map<String, List<Channel>> channels;
 
 	private M3UService() {
-		channels = new TreeMap<>();
+		this.channels = new TreeMap<>();
 	}
 
-	public Map<String, List<Channel>> buildChannels(String url) throws Exception {
-		channels.clear();
-		List<String> strings = fetchWebSite(url);
-		Iterator<String> i = strings.iterator();
+	public Map<String, List<Channel>> buildChannels(final String url) throws Exception {
+		this.channels.clear();
+		final List<String> strings = this.fetchWebSite(url);
+		final Iterator<String> i = strings.iterator();
 		List<String> sources = new ArrayList<>();
 		while (i.hasNext()) {
-			String string = i.next();
+			final String string = i.next();
 			if (string.startsWith("#EXTM3U")) {
 				LOG.info("Header #EXTM3U");
 			}
@@ -52,30 +52,37 @@ public class M3UService {
 				sources.add(string);
 			} else {
 				sources.add(string);
-				Channel channel = ChannelConverter.getInstance().toTarget(sources);
-				if (channels.get(channel.getGroupTitle()) == null) {
-					channels.put(channel.getGroupTitle(), new ArrayList<>());
+				final Channel channel = ChannelConverter.getInstance().toTarget(sources);
+				if (this.channels.get(channel.getGroupTitle()) == null) {
+					this.channels.put(channel.getGroupTitle(), new ArrayList<>());
 				}
-				channels.get(channel.getGroupTitle()).add(channel);
+				this.channels.get(channel.getGroupTitle()).add(channel);
 				sources = new ArrayList<>();
 			}
 		}
-		return channels;
+		return this.channels;
 	}
 
-	public List<String> fetchWebSite(String url) throws Exception {
-		List<String> results = new ArrayList<>();
-		URL resource = new URL(url);
-		InputStream in = resource.openStream();
-		BufferedInputStream buffer = new BufferedInputStream(in);
-		byte[] bytes = buffer.readAllBytes();
+	/**
+	 * This method fetch a M3U file for the given url.
+	 *
+	 * @param url the given url
+	 * @return an array of {@link String} where each element is line of the file
+	 * @throws Exception
+	 */
+	public List<String> fetchWebSite(final String url) throws Exception {
+		final List<String> results = new ArrayList<>();
+		final URL resource = new URL(url);
+		final InputStream in = resource.openStream();
+		final BufferedInputStream buffer = new BufferedInputStream(in);
+		final byte[] bytes = buffer.readAllBytes();
 		LOG.info("M3U size: {}", bytes.length);
 		buffer.close();
 		in.close();
 		// =======
-		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		InputStreamReader in2 = new InputStreamReader(bais);
-		BufferedReader br = new BufferedReader(in2);
+		final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+		final InputStreamReader in2 = new InputStreamReader(bais);
+		final BufferedReader br = new BufferedReader(in2);
 		String line = null;
 		do {
 			line = br.readLine();
@@ -87,15 +94,15 @@ public class M3UService {
 	}
 
 	public Map<String, List<Channel>> getChannels() {
-		return channels;
+		return this.channels;
 	}
 
 	public Channel getFirst() {
-		return getChannels().entrySet().iterator().next().getValue().get(0);
+		return this.getChannels().entrySet().iterator().next().getValue().get(0);
 	}
 
-	public List<Channel> sortGroup(String group) {
-		List<Channel> tmpChannels = this.channels.get(group);
+	public List<Channel> sortGroup(final String group) {
+		final List<Channel> tmpChannels = this.channels.get(group);
 		tmpChannels.sort(Comparator.comparing(Channel::getTvgName));
 		return tmpChannels;
 	}

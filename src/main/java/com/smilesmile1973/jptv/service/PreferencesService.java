@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.smilesmile1973.jptv.service;
 
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This controller is used to manage the configuration file of JPTV
- * 
+ *
  * @author smilesmile1973@gmail.com
  *
  */
@@ -52,7 +52,7 @@ public class PreferencesService {
 	private static final Map<String, String> PREFERENCES = new LinkedHashMap<>();
 
 	/**
-	 * 
+	 *
 	 * @return the instance of this class.
 	 */
 	public static final PreferencesService getInstance() {
@@ -65,35 +65,41 @@ public class PreferencesService {
 	private PreferencesService() {
 	}
 
-	private String buildProperty(String key, String value) {
-		StringBuilder sb = new StringBuilder(key.trim()).append("=").append(value.trim());
+	/**
+	 *
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	private String buildProperty(final String key, final String value) {
+		final StringBuilder sb = new StringBuilder(key.trim()).append("=").append(value.trim());
 		return sb.toString();
 	}
-	
+
 	public boolean preferencesFileExists() {
-		File file = new File(CONFIG_FILE);
+		final File file = new File(CONFIG_FILE);
 		return file.exists();
 	}
 
 	/**
 	 * Fill the cache {@link #PREFERENCES}.
-	 * 
+	 *
 	 * This method read a property from the {@link #PREFERENCES}. If the
 	 * configuration file doesn't exist, then an empty value is returned, otherwise
 	 * the value is returned.
 	 * If the property file exists but not the property, an empty value is returned.
-	 * 
-	 * @param key 
+	 *
+	 * @param key
 	 * @return returns the property or an empty {@link String}.
 	 */
-	public String readProperty(String key) throws IOException {
-		File file = new File(CONFIG_FILE);
+	public String readProperty(final String key) throws IOException {
+		final File file = new File(CONFIG_FILE);
 		if (file.exists() && PREFERENCES.isEmpty()) {
-			Properties properties = new Properties();
-			InputStream in = new FileInputStream(file);
+			final Properties properties = new Properties();
+			final InputStream in = new FileInputStream(file);
 			properties.load(in);
-			Set<Entry<Object, Object>> entries = properties.entrySet();
-			for (Entry<Object, Object> entry : entries) {
+			final Set<Entry<Object, Object>> entries = properties.entrySet();
+			for (final Entry<Object, Object> entry : entries) {
 				PREFERENCES.put(entry.getKey().toString(), entry.getValue().toString());
 			}
 			in.close();
@@ -101,10 +107,10 @@ public class PreferencesService {
 		return PREFERENCES.get(key) == null ? "" : PREFERENCES.get(key);
 	}
 
-	public void removeProperty(String key) throws IOException {
-		File file = new File(CONFIG_FILE);
+	public void removeProperty(final String key) throws IOException {
+		final File file = new File(CONFIG_FILE);
 		if (!PREFERENCES.isEmpty()) {
-			String value = PREFERENCES.remove(key.trim());
+			final String value = PREFERENCES.remove(key.trim());
 			if (value != null) {
 				if (PREFERENCES.isEmpty()) {
 					removeConfigurationFile();
@@ -114,9 +120,9 @@ public class PreferencesService {
 
 						fileChannel.truncate(0).close();
 					}
-					Set<Entry<String, String>> entries = PREFERENCES.entrySet();
-					PrintWriter printWriter = new PrintWriter(file);
-					for (Entry<String, String> entry : entries) {
+					final Set<Entry<String, String>> entries = PREFERENCES.entrySet();
+					final PrintWriter printWriter = new PrintWriter(file);
+					for (final Entry<String, String> entry : entries) {
 						printWriter.write(this.buildProperty(key, value));
 					}
 
@@ -128,13 +134,13 @@ public class PreferencesService {
 	/**
 	 * This method write a property in the configuration file. If the configuration
 	 * file is not present the file will be created.
-	 * 
+	 *
 	 * @param key   the property key
 	 * @param value the value
 	 * @throws IOException
 	 */
-	public void writeProperty(String key, String value) throws IOException {
-		File file = new File(CONFIG_FILE);
+	public void writeProperty(final String key, final String value) throws IOException {
+		final File file = new File(CONFIG_FILE);
 		LOG.debug(file.getAbsolutePath());
 		PREFERENCES.put(key.trim(), value);
 		if (file.exists()) {
@@ -149,9 +155,9 @@ public class PreferencesService {
 			}
 		}
 		try (PrintStream out = new PrintStream(file)) {
-			Set<Entry<String, String>> entries = PREFERENCES.entrySet();
-			for (Entry<String, String> entry : entries) {
-				out.println(buildProperty(entry.getKey(), entry.getValue()));
+			final Set<Entry<String, String>> entries = PREFERENCES.entrySet();
+			for (final Entry<String, String> entry : entries) {
+				out.println(this.buildProperty(entry.getKey(), entry.getValue()));
 			}
 			out.flush();
 		}
@@ -164,7 +170,7 @@ public class PreferencesService {
 	}
 
 	public static final void removeConfigurationFile() {
-		File file = new File(CONFIG_FILE);
+		final File file = new File(CONFIG_FILE);
 		LOG.info("Deletion of the file {}", file.getAbsoluteFile());
 		if (!file.delete()) {
 			LOG.error("The file {} can not be deleted.", file.getAbsoluteFile());
