@@ -8,8 +8,8 @@ I did this software to try JavaFX 15 and test the PixelBuffer available from JDK
 ### Prerequisite
 
 OpenJDK (Open Java Development Toolkit) must be installed.  
-You can download the last version (_16 at the time_) at the following URL:  
-<https://openjdk.java.net/>
+You can download the last version 17 at the following URL:  
+<https://adoptium.net/fr/temurin/releases/?version=17>
 
 VIDEOLAN aka VLC must be installed on your computer.  
 You can download the last version at the following URL:  
@@ -38,7 +38,7 @@ In this case, a popup will be displaying inviting you to enter an MRL (aka URL) 
 
 #### Desktop
 
-If you have installed Java with an setup for windows, for example the Oracle JDK, then, you can use it by double clicking on it.
+If you have installed Java with a setup for Windows (.msi), for example the Oracle JDK, then, you can use it by double clicking on it.
 
 ### User Interface
 
@@ -46,4 +46,4 @@ If you have installed Java with an setup for windows, for example the Oracle JDK
 | ----------------------------------------------------- | ------------------------------ |
 | Move the mouse pointer on the left of the window      | The channels list will appear  |
 | Move the mouse pointer on the top right of the window | The technical info will appear |
-| Double inside the window                              | Toggle full screen             |
+| Double click inside the window                        | Toggle full screen             |
