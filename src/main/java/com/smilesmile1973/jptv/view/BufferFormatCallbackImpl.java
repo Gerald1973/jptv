@@ -16,7 +16,6 @@ public class BufferFormatCallbackImpl implements BufferFormatCallback {
 
 	@Override
 	public void allocatedBuffers(ByteBuffer[] buffers) {
-		LOG.debug("allocatedBuffers");
 		PixelFormat<ByteBuffer> pixelFormat = PixelFormat.getByteBgraPreInstance();
 		int height = PixelBufferInstance.getInstance().getHeight();
 		int width = PixelBufferInstance.getInstance().getWidth();
@@ -26,9 +25,33 @@ public class BufferFormatCallbackImpl implements BufferFormatCallback {
 
 	@Override
 	public BufferFormat getBufferFormat(int sourceWidth, int sourceHeight) {
-		LOG.debug("getBufferFormat");
 		PixelBufferInstance.getInstance().setHeight(sourceHeight);
 		PixelBufferInstance.getInstance().setWidth(sourceWidth);
 		return new RV32BufferFormat(sourceWidth, sourceHeight);
 	}
+
+	@Override
+	public void newFormatSize(int bufferWidth, int bufferHeight, int displayWidth, int displayHeight) {
+		LOG.debug("newFormatSize: buffer={}x{}, display={}x{}", bufferWidth, bufferHeight, displayWidth, displayHeight);
+        int currentWidth = PixelBufferInstance.getInstance().getWidth();
+        int currentHeight = PixelBufferInstance.getInstance().getHeight();
+        if (bufferWidth != currentWidth || bufferHeight != currentHeight) {
+            PixelBufferInstance.getInstance().setWidth(bufferWidth);
+            PixelBufferInstance.getInstance().setHeight(bufferHeight);
+            if (PixelBufferInstance.getInstance().getPixelBuffer() != null) {
+                PixelFormat<ByteBuffer> pixelFormat = PixelFormat.getByteBgraPreInstance();
+                PixelBuffer<ByteBuffer> newPixelBuffer = new PixelBuffer<>(
+                    bufferWidth, bufferHeight,
+                    PixelBufferInstance.getInstance().getPixelBuffer().getBuffer(),
+                    pixelFormat
+                );
+                PixelBufferInstance.getInstance().setPixelBuffer(newPixelBuffer);
+                PixelBufferInstance.getInstance().getImageView().setImage(
+                    new javafx.scene.image.WritableImage(newPixelBuffer)
+                );
+            } else {
+                LOG.warn("PixelBuffer non initialisé, ignorer la mise à jour");
+            }
+        }
+    }
 }

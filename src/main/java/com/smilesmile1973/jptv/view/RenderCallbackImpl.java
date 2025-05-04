@@ -17,15 +17,31 @@ public class RenderCallbackImpl implements RenderCallback {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RenderCallbackImpl.class);
 
+	@Override
+	public void lock(MediaPlayer mediaPlayer) {
+		//LOG.debug("Lock: buffer vidéo locking");
+	}
 
 	@Override
-	public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat) {
-		Platform.runLater(() -> PixelBufferInstance.getInstance().getPixelBuffer().updateBuffer(pb -> {
-			if (!PixelBufferInstance.getInstance().isDisplayed()) {
-				PixelBufferInstance.getInstance().setDisplayed(true);
-				Utils.getEventBus().post(new RendererCreatedEvent(true));
-			}
-			return null;
-		}));
+	public void display(MediaPlayer mediaPlayer, ByteBuffer[] nativeBuffers, BufferFormat bufferFormat,
+			int displayWidth, int displayHeight) {
+		//LOG.debug("display: Rendu de la frame, display={}x{}", displayWidth, displayHeight);
+        if (PixelBufferInstance.getInstance().getPixelBuffer() != null) {
+            Platform.runLater(() -> {
+                PixelBufferInstance.getInstance().getPixelBuffer().updateBuffer(pb -> null);
+                if (!PixelBufferInstance.getInstance().isDisplayed()) {
+                    PixelBufferInstance.getInstance().setDisplayed(true);
+                    Utils.getEventBus().post(new RendererCreatedEvent(true));
+                }
+            });
+        } else {
+            LOG.warn("PixelBuffer non initialisé, ignorer le rendu");
+        }
+		
+	}
+
+	@Override
+	public void unlock(MediaPlayer mediaPlayer) {
+		//LOG.debug("unlock: Unlock video buffer");
 	}
 }

@@ -22,13 +22,14 @@
 		<dependency>
 			<groupId>uk.co.caprica</groupId>
 			<artifactId>vlcj</artifactId>
-			<version>4.7.1</version>
+			<version>4.11.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-base</artifactId>
-			<version>${openjfx.version}</version>
+    		<groupId>uk.co.caprica</groupId>
+    		<artifactId>vlcj-javafx</artifactId>
+    		<version>1.2.0</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>

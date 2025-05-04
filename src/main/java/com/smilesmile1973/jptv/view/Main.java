@@ -41,7 +41,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.TilePane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -131,18 +130,19 @@ public class Main extends Application {
 		videoPane.setId("videoPane");
 		final CallbackVideoSurface callBackVideoSurface = PixelBufferInstance.getInstance().buildCallBackVideoSurface();
 		this.embeddedMediaPlayer.videoSurface().set(callBackVideoSurface);
-		videoPane.widthProperty().addListener((observableValue, oldValue, newValue) -> {
-			this.placeVideoImage();
-		});
 
-		videoPane.heightProperty().addListener((observableValue, oldValue, newValue) -> {
-			this.placeVideoImage();
-		});
-
-		videoPane.getChildren().add(PixelBufferInstance.getInstance().getImageView());
+		ImageView imageView = PixelBufferInstance.getInstance().getImageView();
+		videoPane.getChildren().add(imageView);
 		videoPane.getChildren().add(this.infoView);
 		this.infoView.setLayoutX(videoPane.getWidth() - Constants.INFO_VIEW_WIDTH);
 		this.infoView.setVisible(false);
+
+		imageView.fitWidthProperty().bind(videoPane.widthProperty());
+		imageView.fitHeightProperty().bind(videoPane.heightProperty());
+		imageView.setX(0);
+		imageView.setY(0);
+		imageView.setPreserveRatio(false);
+
 		videoPane.setOnMouseClicked(eventMouse -> {
 			if (eventMouse.getButton().equals(MouseButton.PRIMARY) && eventMouse.getClickCount() == 2) {
 				this.getStage().setFullScreen(!this.getStage().isFullScreen());
@@ -224,7 +224,8 @@ public class Main extends Application {
 
 	private void initChannels(final Window owner) {
 		try {
-			if (!this.getParameters().getRaw().isEmpty() && !Strings.isNullOrEmpty(this.getParameters().getRaw().get(0))) {
+			if (!this.getParameters().getRaw().isEmpty()
+					&& !Strings.isNullOrEmpty(this.getParameters().getRaw().get(0))) {
 				M3UService.getInstance().buildChannels(this.getParameters().getRaw().get(0));
 				Utils.getEventBus().post(new ChannelListCreatedEvent(true));
 			} else {
@@ -239,15 +240,6 @@ public class Main extends Application {
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	private void placeVideoImage() {
-		final ImageView imageView = PixelBufferInstance.getInstance().getImageView();
-		final Region region = (Region) imageView.getParent();
-		imageView.fitWidthProperty().set((int) region.getWidth());
-		imageView.fitHeightProperty().set((int) region.getHeight());
-		imageView.setX(0);
-		imageView.setY(0);
 	}
 
 	@Subscribe

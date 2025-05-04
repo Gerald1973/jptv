@@ -82,26 +82,30 @@ public class ChannelView extends GridPane {
 	}
 
 	private void loadImage(Channel channel, ImageView imageView) {
-		if (channel.getTvLogo() != null && !channel.getTvLogo().isBlank()) {
-			Task<Void> task = new Task<Void>() {
-				@Override
-				protected Void call() throws Exception {
-					Image image = new Image(channel.getTvLogo(), LOGO_SIZE, LOGO_SIZE, true, true);
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							if (image.getHeight() > 0 && image.getWidth() > 0) {
-								imageView.setX((LOGO_PANE_WIDTH - image.getWidth()) / 2);
-								imageView.setY((LOGO_PANE_HEIGHT - image.getHeight()) / 2);
-								imageView.setImage(image);
-							}
-						}
-					});
-					return null;
-				}
-			};
-			Thread th = new Thread(task);
-			th.start();
-		}
-	}
+        if (channel.getTvLogo() != null && !channel.getTvLogo().isBlank()) {
+            Task<Image> task = new Task<Image>() {
+                @Override
+                protected Image call() throws Exception {
+                    return new Image(channel.getTvLogo(), LOGO_SIZE, LOGO_SIZE, true, true);
+                }
+            };
+
+            task.setOnSucceeded(event -> {
+                Image image = task.getValue();
+                Platform.runLater(() -> {
+                    if (image != null && image.getHeight() > 0 && image.getWidth() > 0) {
+                        imageView.setX((LOGO_PANE_WIDTH - image.getWidth()) / 2);
+                        imageView.setY((LOGO_PANE_HEIGHT - image.getHeight()) / 2);
+                        imageView.setImage(image);
+                    }
+                });
+            });
+
+            task.setOnFailed(event -> {
+                LOG.error("Failed to load image: {}", channel.getTvLogo(), task.getException());
+            });
+
+            new Thread(task).start();
+        }
+    }
 }
